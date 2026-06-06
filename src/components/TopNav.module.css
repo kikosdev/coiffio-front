@@ -1,0 +1,106 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 56px;
+  background: rgba(243, 236, 224, 0.78);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+.mark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--champagne);
+  margin: 0 2px 6px;
+}
+.sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.links a {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color .15s ease;
+}
+.links a:hover { color: var(--ink); }
+.ctaText {
+  font-family: var(--serif) !important;
+  font-style: italic;
+  font-size: 15px !important;
+  color: var(--ink) !important;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.locale {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 6px 10px;
+  border-right: 1px solid var(--line);
+}
+.signin {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s ease;
+}
+.signin:hover { background: var(--surface); }
+.book {
+  background: var(--ink);
+  color: var(--surface);
+  padding: 10px 22px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s ease;
+}
+.book:hover { background: var(--champagne); color: #1c1612; }

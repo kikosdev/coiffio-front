@@ -1640,6 +1640,34 @@ function ClientsScreen() {
    APP SHELL
 ═══════════════════════════════════════════════════════════ */
 
+/* Mobile bottom nav — 5 primary tabs shown at ≤768px */
+const MOBILE_NAV_ITEMS = [
+  { id: 'accueil',  label: 'Accueil',  icon: 'house' },
+  { id: 'schedule', label: 'Agenda',   icon: 'calendar-check' },
+  { id: 'services', label: 'Services', icon: 'scissors' },
+  { id: 'finance',  label: 'Finance',  icon: 'credit-card' },
+  { id: 'team',     label: 'Équipe',   icon: 'user-cog' },
+]
+
+function MobileNav({ current, setCurrent }) {
+  return (
+    <nav className="sh-mobile-nav">
+      {MOBILE_NAV_ITEMS.map(n => (
+        <button
+          key={n.id}
+          className={'sh-mn-item' + (current === n.id ? ' active' : '')}
+          onClick={() => setCurrent(n.id)}
+        >
+          <span className="sh-mn-ic">
+            <SIcon name={n.icon} size={20} />
+          </span>
+          <span className="sh-mn-label">{n.label}</span>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 const NAV_ITEMS = [
   { id:'accueil',  label:'Accueil',       icon:'house' },
   { id:'schedule', label:'Rendez-vous',   icon:'calendar-check' },
@@ -1757,6 +1785,9 @@ export default function SalonDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Mobile bottom tab bar — hidden on desktop, shown at ≤768px */}
+      <MobileNav current={current} setCurrent={setCurrent} />
     </div>
   )
 }

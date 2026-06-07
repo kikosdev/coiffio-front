@@ -129,39 +129,78 @@ function OverviewScreen({ setCurrent }) {
           {/* Stock alerts */}
           <div className="sh-card sh-ov-stock">
             <div className="sh-card-head">
-              <div>
-                <h3>Alertes de Stock Bas</h3>
-                <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--muted)' }}>Produits devant faire l'objet d'un réapprovisionnement.</p>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div className="sh-ov-stock-icon-wrap">
+                  <SIcon name="package" size={15} />
+                </div>
+                <div>
+                  <h3>Alertes de Stock Bas</h3>
+                  <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--muted)' }}>Produits à réapprovisionner.</p>
+                </div>
               </div>
+              <span className="sh-ov-stock-count">{LOW_STOCK.length} produit{LOW_STOCK.length > 1 ? 's' : ''}</span>
             </div>
             <div className="sh-ov-stock-list">
-              {LOW_STOCK.map((p, i) => (
-                <div key={i} className="sh-ov-stock-row">
-                  <div>
-                    <div className="sh-ov-stock-name">{p.name}</div>
-                    <div className="sh-ov-stock-sub">Stock restant : <strong>{p.qty}</strong> (Alerte à {p.threshold})</div>
+              {LOW_STOCK.map((p, i) => {
+                const pct = Math.round((p.qty / p.threshold) * 100)
+                return (
+                  <div key={i} className="sh-ov-stock-row">
+                    <div className="sh-ov-stock-accent" />
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div className="sh-ov-stock-name">{p.name}</div>
+                      <div className="sh-ov-stock-bar-wrap">
+                        <div className="sh-ov-stock-bar">
+                          <div className="sh-ov-stock-bar-fill" style={{ width:`${pct}%` }} />
+                        </div>
+                        <span className="sh-ov-stock-sub">{p.qty} / {p.threshold}</span>
+                      </div>
+                    </div>
+                    <span className="sh-ov-alert-badge">
+                      <SIcon name="alert-triangle" size={10} />
+                      Alerte
+                    </span>
                   </div>
-                  <span className="sh-ov-alert-badge">Alerte</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
           {/* Revenue distribution */}
           <div className="sh-card sh-ov-distrib">
-            <h3 style={{ fontFamily:'var(--serif)', fontWeight:500, fontSize:17, marginBottom:16 }}>Distribution de l'Activité</h3>
+            <div className="sh-card-head">
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div className="sh-ov-distrib-icon-wrap">
+                  <SIcon name="pie-chart" size={15} />
+                </div>
+                <div>
+                  <h3>Distribution de l'Activité</h3>
+                  <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--muted)' }}>Répartition des encaissements du jour.</p>
+                </div>
+              </div>
+            </div>
             <div className="sh-ov-distrib-rows">
               {[
-                { label:'CA Espèces',           value:'0 €' },
-                { label:'CA Carte Bancaire',     value:'0 €' },
-                { label:'CA Paiements Mobiles',  value:'0 €' },
+                { label:'CA Espèces',           icon:'banknote',     value:'0 €', color:'#4A7C59' },
+                { label:'CA Carte Bancaire',     icon:'credit-card',  value:'0 €', color:'var(--champagne-deep)' },
+                { label:'CA Paiements Mobiles',  icon:'smartphone',   value:'0 €', color:'#6B5B95' },
               ].map((r, i) => (
                 <div key={i} className="sh-ov-distrib-row">
-                  <span>{r.label}</span><span>{r.value}</span>
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <span className="sh-ov-distrib-dot" style={{ background: r.color }} />
+                    <div className="sh-ov-distrib-icon" style={{ color: r.color }}>
+                      <SIcon name={r.icon} size={13} />
+                    </div>
+                    <span>{r.label}</span>
+                  </div>
+                  <span className="sh-ov-distrib-val">{r.value}</span>
                 </div>
               ))}
               <div className="sh-ov-distrib-row total">
-                <span>Total Encaissé</span><span>0 €</span>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <SIcon name="landmark" size={14} style={{ color:'var(--champagne-deep)' }} />
+                  <span>Total Encaissé</span>
+                </div>
+                <span>0 €</span>
               </div>
             </div>
           </div>
@@ -342,10 +381,327 @@ function StylistColumn({ s }) {
   )
 }
 
+/* ═══════════════════════════════════════════════════════════
+   NEW BOOKING MODAL
+═══════════════════════════════════════════════════════════ */
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'
+function authHdr() {
+  const t = localStorage.getItem('haire_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
+function NewBookingModal({ onClose, onSuccess }) {
+  const [step, setStep]   = useState(1)
+  const [services, setServices] = useState([])
+  const [stylists, setStylists] = useState([])
+  const [loadingData, setLoadingData] = useState(true)
+  const [submitting, setSubmitting]   = useState(false)
+  const [error, setError] = useState('')
+
+  // Step 1 — client
+  const [guestName,  setGuestName]  = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
+
+  // Step 2 — services / stylist / datetime
+  const [selectedSvcs,    setSelectedSvcs]    = useState([])
+  const [selectedStylist, setSelectedStylist] = useState(null)
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const [date,  setDate]  = useState(todayStr)
+  const [time,  setTime]  = useState(() => {
+    const now = new Date()
+    const h   = now.getHours()
+    const m   = Math.ceil(now.getMinutes() / 15) * 15
+    const hh  = m === 60 ? h + 1 : h
+    const mm  = m === 60 ? 0 : m
+    return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`
+  })
+  const [notes, setNotes] = useState('')
+
+  const totalDuration = selectedSvcs.reduce((s, sv) => s + (sv.duration || 0), 0)
+  const totalPrice    = selectedSvcs.reduce((s, sv) => s + (sv.price || 0), 0)
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API_BASE}/services`, { headers: authHdr() }).then(r => r.json()),
+      fetch(`${API_BASE}/stylists`, { headers: authHdr() }).then(r => r.json()),
+    ]).then(([svcs, stys]) => {
+      setServices(Array.isArray(svcs) ? svcs : (svcs?.data ?? []))
+      setStylists(Array.isArray(stys) ? stys : [])
+    }).catch(() => {}).finally(() => setLoadingData(false))
+  }, [])
+
+  function toggleSvc(svc) {
+    setSelectedSvcs(prev =>
+      prev.find(s => s._id === svc._id) ? prev.filter(s => s._id !== svc._id) : [...prev, svc]
+    )
+  }
+
+  async function handleSubmit() {
+    setError('')
+    setSubmitting(true)
+    try {
+      const startsAt = new Date(`${date}T${time}:00`).toISOString()
+      const body = {
+        guestName:  guestName.trim(),
+        guestEmail: guestEmail.trim() || undefined,
+        guestPhone: guestPhone.trim() || undefined,
+        stylistId:  selectedStylist._id,
+        serviceIds: selectedSvcs.map(s => s._id),
+        startsAt,
+        totalDurationMinutes: totalDuration,
+        totalPriceEur: totalPrice,
+        notes: notes.trim() || undefined,
+      }
+      const res = await fetch(`${API_BASE}/appointments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHdr() },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}))
+        throw new Error(e.message || `Erreur ${res.status}`)
+      }
+      onSuccess()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const canStep1 = guestName.trim().length >= 2
+  const canStep2 = selectedSvcs.length > 0 && selectedStylist && date && time
+
+  const CATEGORY_LABELS = {
+    haircut: 'Coupe', coloring: 'Couleur', treatment: 'Soin', styling: 'Coiffage', beard: 'Barbe',
+  }
+  const grouped = services.reduce((acc, s) => {
+    const cat = s.category || 'other'
+    ;(acc[cat] = acc[cat] || []).push(s)
+    return acc
+  }, {})
+
+  return (
+    <div className="nbm-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="nbm-panel">
+
+        {/* Header */}
+        <div className="nbm-header">
+          <div>
+            <div className="nbm-eyebrow">Nouveau rendez-vous</div>
+            <h2 className="nbm-title">
+              {step === 1 && <>Informations <em>client</em>.</>}
+              {step === 2 && <>Services & <em>stylist</em>.</>}
+              {step === 3 && <>Confirmer la <em>réservation</em>.</>}
+            </h2>
+          </div>
+          <button className="nbm-close" onClick={onClose}><SIcon name="x" size={18}/></button>
+        </div>
+
+        {/* Step indicators */}
+        <div className="nbm-steps">
+          {['Client', 'Services', 'Confirmation'].map((l, i) => (
+            <div key={i} className={`nbm-step ${step > i+1 ? 'done' : ''} ${step === i+1 ? 'active' : ''}`}>
+              <div className="nbm-step-dot">{step > i+1 ? <SIcon name="check" size={11}/> : i+1}</div>
+              <span>{l}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div className="nbm-body">
+
+          {/* ── Step 1: Client ── */}
+          {step === 1 && (
+            <div className="nbm-section">
+              <div className="nbm-field">
+                <label className="nbm-label">Nom complet *</label>
+                <input className="nbm-input" placeholder="ex. Alice Dubois" value={guestName} onChange={e => setGuestName(e.target.value)} />
+              </div>
+              <div className="nbm-row-2">
+                <div className="nbm-field">
+                  <label className="nbm-label">Email</label>
+                  <input className="nbm-input" type="email" placeholder="alice@email.com" value={guestEmail} onChange={e => setGuestEmail(e.target.value)} />
+                </div>
+                <div className="nbm-field">
+                  <label className="nbm-label">Téléphone</label>
+                  <input className="nbm-input" type="tel" placeholder="+33 6 …" value={guestPhone} onChange={e => setGuestPhone(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 2: Services + Stylist + Date ── */}
+          {step === 2 && (
+            <div className="nbm-section">
+              {loadingData ? (
+                <div className="nbm-loading"><SIcon name="loader" size={18}/>Chargement…</div>
+              ) : (
+                <>
+                  <div className="nbm-field">
+                    <label className="nbm-label">Services *</label>
+                    <div className="nbm-svc-groups">
+                      {Object.entries(grouped).map(([cat, items]) => (
+                        <div key={cat}>
+                          <div className="nbm-svc-cat">{CATEGORY_LABELS[cat] || cat}</div>
+                          <div className="nbm-svc-grid">
+                            {items.map(svc => {
+                              const sel = !!selectedSvcs.find(s => s._id === svc._id)
+                              return (
+                                <button key={svc._id} className={`nbm-svc-chip ${sel ? 'selected' : ''}`} onClick={() => toggleSvc(svc)}>
+                                  <span className="nbm-svc-name">{svc.name}</span>
+                                  <span className="nbm-svc-meta">{svc.duration}min · {svc.price}€</span>
+                                  {sel && <SIcon name="check" size={11} style={{ position:'absolute', top:8, right:8, color:'var(--champagne-deep)' }}/>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedSvcs.length > 0 && (
+                      <div className="nbm-svc-summary">
+                        <SIcon name="clock" size={13}/> {totalDuration} min &nbsp;·&nbsp;
+                        <SIcon name="euro" size={13}/> {totalPrice} €
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="nbm-field">
+                    <label className="nbm-label">Styliste *</label>
+                    <div className="nbm-stylist-grid">
+                      {stylists.map(st => {
+                        const sel = selectedStylist?._id === st._id
+                        const initials = `${st.firstName?.[0] || ''}${st.lastName?.[0] || ''}`
+                        return (
+                          <button key={st._id} className={`nbm-stylist-chip ${sel ? 'selected' : ''}`} onClick={() => setSelectedStylist(st)}>
+                            <div className="nbm-stylist-av">{initials}</div>
+                            <div>
+                              <div className="nbm-stylist-name">{st.firstName} {st.lastName}</div>
+                              <div className="nbm-stylist-role">{st.role}</div>
+                            </div>
+                            {sel && <SIcon name="check" size={13} style={{ marginLeft:'auto', color:'var(--champagne-deep)', flexShrink:0 }}/>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="nbm-row-2">
+                    <div className="nbm-field">
+                      <label className="nbm-label">Date *</label>
+                      <input className="nbm-input" type="date" min={todayStr} value={date} onChange={e => setDate(e.target.value)} />
+                    </div>
+                    <div className="nbm-field">
+                      <label className="nbm-label">Heure *</label>
+                      <input className="nbm-input" type="time" min="09:00" max="19:00" step="900" value={time} onChange={e => setTime(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div className="nbm-field">
+                    <label className="nbm-label">Notes internes</label>
+                    <textarea className="nbm-input nbm-textarea" placeholder="Préférences, allergies, instructions…" value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── Step 3: Confirm ── */}
+          {step === 3 && (
+            <div className="nbm-section">
+              <div className="nbm-confirm-card">
+                <div className="nbm-confirm-row">
+                  <div className="nbm-confirm-icon"><SIcon name="user" size={14}/></div>
+                  <div>
+                    <div className="nbm-confirm-label">Client</div>
+                    <div className="nbm-confirm-val">{guestName}{guestPhone && <span className="nbm-confirm-sub"> · {guestPhone}</span>}</div>
+                  </div>
+                </div>
+                <div className="nbm-confirm-row">
+                  <div className="nbm-confirm-icon"><SIcon name="scissors" size={14}/></div>
+                  <div>
+                    <div className="nbm-confirm-label">Services</div>
+                    <div className="nbm-confirm-val">{selectedSvcs.map(s => s.name).join(', ')}</div>
+                  </div>
+                </div>
+                <div className="nbm-confirm-row">
+                  <div className="nbm-confirm-icon"><SIcon name="user-check" size={14}/></div>
+                  <div>
+                    <div className="nbm-confirm-label">Styliste</div>
+                    <div className="nbm-confirm-val">{selectedStylist?.firstName} {selectedStylist?.lastName}</div>
+                  </div>
+                </div>
+                <div className="nbm-confirm-row">
+                  <div className="nbm-confirm-icon"><SIcon name="calendar" size={14}/></div>
+                  <div>
+                    <div className="nbm-confirm-label">Date & heure</div>
+                    <div className="nbm-confirm-val">
+                      {new Date(`${date}T${time}`).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })} à {time}
+                    </div>
+                  </div>
+                </div>
+                <div className="nbm-confirm-divider"/>
+                <div className="nbm-confirm-totals">
+                  <div className="nbm-confirm-total-row"><span>Durée</span><span>{totalDuration} min</span></div>
+                  <div className="nbm-confirm-total-row total"><span>Total</span><span>{totalPrice} €</span></div>
+                </div>
+              </div>
+              {notes && <div className="nbm-notes-block"><SIcon name="file-text" size={13}/>{notes}</div>}
+              {error && <div className="nbm-error"><SIcon name="alert-triangle" size={13}/>{error}</div>}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="nbm-footer">
+          {step > 1 && (
+            <button className="sh-btn" onClick={() => { setStep(s => s - 1); setError('') }}>
+              <SIcon name="arrow-left" size={14}/>Retour
+            </button>
+          )}
+          <div style={{ marginLeft:'auto', display:'flex', gap:10 }}>
+            <button className="sh-btn" onClick={onClose}>Annuler</button>
+            {step < 3 && (
+              <button
+                className="sh-btn sh-btn-primary"
+                disabled={step === 1 ? !canStep1 : !canStep2}
+                onClick={() => setStep(s => s + 1)}
+              >
+                Suivant<SIcon name="arrow-right" size={14}/>
+              </button>
+            )}
+            {step === 3 && (
+              <button className="sh-btn sh-btn-primary" disabled={submitting} onClick={handleSubmit}>
+                {submitting ? <><SIcon name="loader" size={14}/>Enregistrement…</> : <><SIcon name="check" size={14}/>Confirmer le RDV</>}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ScheduleScreen() {
-  const [view, setView] = useState('day')
+  const [view, setView]           = useState('day')
+  const [showModal, setShowModal] = useState(false)
+  const [booked,    setBooked]    = useState(false)
   return (
     <div className="sh-page">
+      {showModal && (
+        <NewBookingModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => { setShowModal(false); setBooked(true); setTimeout(() => setBooked(false), 4000) }}
+        />
+      )}
+      {booked && (
+        <div className="nbm-toast">
+          <SIcon name="check-circle" size={16}/>Rendez-vous créé avec succès.
+        </div>
+      )}
       <div className="sh-page-head">
         <div className="lead">
           <div className="sh-eyebrow" style={{ marginBottom:6 }}>Thursday · 26 May</div>
@@ -361,7 +717,9 @@ function ScheduleScreen() {
           <button className="sh-btn"><SIcon name="chevron-left" size={14}/></button>
           <button className="sh-btn sh-btn-sm">Today</button>
           <button className="sh-btn"><SIcon name="chevron-right" size={14}/></button>
-          <button className="sh-btn sh-btn-primary"><SIcon name="plus" size={14}/>New booking</button>
+          <button className="sh-btn sh-btn-primary" onClick={() => setShowModal(true)}>
+            <SIcon name="plus" size={14}/>New booking
+          </button>
         </div>
       </div>
 

@@ -124,13 +124,13 @@
 .svc-card {
   position: relative; display: flex; flex-direction: row;
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-lg); overflow: hidden;
+  border-radius: var(--radius-lg);
   cursor: pointer; transition: box-shadow .15s, transform .15s;
 }
 .svc-card:hover { box-shadow: var(--shadow-card); transform: translateY(-1px); }
 .svc-card.inactive { opacity: .55; }
 
-.svc-card-stripe { width: 4px; flex-shrink: 0; }
+.svc-card-stripe { width: 4px; flex-shrink: 0; border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
 .svc-card-body {
   flex: 1; padding: 14px 14px 12px;
   display: flex; flex-direction: column; gap: 6px;

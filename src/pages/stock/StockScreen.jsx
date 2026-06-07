@@ -17,17 +17,19 @@ const SEED_FOURNISSEURS = [
 
 /* ─── Seed: produits ─── */
 const SEED_PRODUITS = [
-  { id:1,  nom:'Kérastase Chronologiste Mask',        categorie:'Treatment',   prix:68, achat:30, qty:6,  alerte:5, barcode:'3474636976098', fournisseurId:1, notes:'' },
-  { id:2,  nom:"Kérastase Elixir Ultime L'Huile",     categorie:'Styling',     prix:54, achat:22, qty:9,  alerte:5, barcode:'',              fournisseurId:1, notes:'' },
-  { id:3,  nom:'Metal Detox Anti-Metal Cleansing Cream', categorie:'Treatment', prix:36, achat:14, qty:3,  alerte:5, barcode:'',             fournisseurId:1, notes:'' },
-  { id:4,  nom:'Mythic Oil Original Oil',              categorie:'Styling',     prix:38, achat:15, qty:8,  alerte:5, barcode:'',              fournisseurId:1, notes:'' },
-  { id:5,  nom:'Pro Longer Lengths Renewing Cream',    categorie:'Treatment',   prix:29, achat:11, qty:10, alerte:5, barcode:'',              fournisseurId:null, notes:'' },
-  { id:6,  nom:'Steampod Serum Activated',             categorie:'Styling',     prix:42, achat:18, qty:7,  alerte:5, barcode:'',              fournisseurId:1, notes:'' },
-  { id:7,  nom:'Série Expert Absolut Repair Conditioner', categorie:'Conditioner', prix:32, achat:13, qty:12, alerte:5, barcode:'',          fournisseurId:1, notes:'' },
-  { id:8,  nom:'Série Expert Absolut Repair Shampoo',  categorie:'Shampoo',     prix:28, achat:11, qty:15, alerte:5, barcode:'',              fournisseurId:1, notes:'' },
-  { id:9,  nom:'Série Expert Silver Shampoo',          categorie:'Shampoo',     prix:26, achat:10, qty:14, alerte:5, barcode:'',              fournisseurId:1, notes:'' },
-  { id:10, nom:'Tecni.Art Savage Panache Hairspray',   categorie:'Styling',     prix:24, achat:9,  qty:2,  alerte:5, barcode:'',              fournisseurId:1, notes:'' },
+  { id:1,  nom:'Kérastase Chronologiste Mask',           categorie:'Treatment',   prix:68, achat:30, qty:6,  alerte:5, barcode:'3474636976098', fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:2,  nom:"Kérastase Elixir Ultime L'Huile",        categorie:'Styling',     prix:54, achat:22, qty:9,  alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:true,  promoPercent:15, promoLabel:'NOUVEAUTÉ' },
+  { id:3,  nom:'Metal Detox Anti-Metal Cleansing Cream', categorie:'Treatment',   prix:36, achat:14, qty:3,  alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:4,  nom:'Mythic Oil Original Oil',                categorie:'Styling',     prix:38, achat:15, qty:8,  alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:true,  promoPercent:20, promoLabel:'SOLDES' },
+  { id:5,  nom:'Pro Longer Lengths Renewing Cream',      categorie:'Treatment',   prix:29, achat:11, qty:10, alerte:5, barcode:'',              fournisseurId:null, notes:'', visibleLanding:false, promo:false, promoPercent:0,  promoLabel:'' },
+  { id:6,  nom:'Steampod Serum Activated',               categorie:'Styling',     prix:42, achat:18, qty:7,  alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:7,  nom:'Série Expert Absolut Repair Conditioner',categorie:'Conditioner', prix:32, achat:13, qty:12, alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:8,  nom:'Série Expert Absolut Repair Shampoo',    categorie:'Shampoo',     prix:28, achat:11, qty:15, alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:9,  nom:'Série Expert Silver Shampoo',            categorie:'Shampoo',     prix:26, achat:10, qty:14, alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
+  { id:10, nom:'Tecni.Art Savage Panache Hairspray',     categorie:'Styling',     prix:24, achat:9,  qty:2,  alerte:5, barcode:'',              fournisseurId:1,    notes:'', visibleLanding:true,  promo:false, promoPercent:0,  promoLabel:'' },
 ]
+
+const PROMO_LABELS = ['SOLDES', 'NOUVEAUTÉ', 'EXCLUSIF', 'OFFRE LIMITÉE', 'BEST-SELLER']
 
 const CATEGORIES = ['Shampoo', 'Conditioner', 'Treatment', 'Styling', 'Coloration', 'Soin', 'Autre']
 
@@ -179,15 +181,19 @@ function FournisseurModal({ onClose, onSave }) {
 }
 
 /* ─── Product detail panel ─── */
-function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer }) {
+function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer, onUpdate }) {
   const f = fournisseurs.find(f => f.id === produit.fournisseurId)
   const m = marge(produit.prix, produit.achat)
+  const promoPrice = produit.promo && produit.promoPercent > 0
+    ? (produit.prix * (1 - produit.promoPercent / 100)).toFixed(2)
+    : null
+
   return (
     <div className="stk-detail-card stk-card">
       <div className="stk-detail-head">
         <div className="stk-detail-heading">Détails du Produit</div>
         <div style={{ display:'flex', gap:8 }}>
-          <button className="sh-btn" onClick={onAjuster}>Ajuster</button>
+          <button className="sh-btn" onClick={onAjuster}>Modifier</button>
           <button className="sh-btn stk-btn-danger" onClick={onSupprimer}>Supprimer</button>
         </div>
       </div>
@@ -197,6 +203,7 @@ function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer }) {
           Catégorie : {produit.categorie}
           {produit.barcode && <> · Barcode : {produit.barcode}</>}
         </div>
+
         <div className="stk-detail-stats">
           <div className="stk-detail-stat">
             <div className="stk-stat-lbl">PRIX DE VENTE</div>
@@ -211,12 +218,79 @@ function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer }) {
             <div className="stk-stat-val stk-stat-marge">{m !== null ? `${m}%` : '—'}</div>
           </div>
         </div>
+
         {f && (
           <div className="stk-detail-fourn">
             <span className="stk-detail-fourn-lbl">Fournisseur :</span>
             <span className="stk-detail-fourn-val">{f.nom}</span>
           </div>
         )}
+
+        {/* ── Visibility ── */}
+        <div className="stk-section-block">
+          <div className="stk-section-title"><SIcon name="eye" size={13}/>Visibilité Landing Page</div>
+          <div className="stk-toggle-row">
+            <div>
+              <div className="stk-toggle-label">Afficher sur la page d'accueil</div>
+              <div className="stk-toggle-sub">
+                {produit.visibleLanding ? 'Visible aux clients depuis la boutique.' : 'Masqué — non visible par les clients.'}
+              </div>
+            </div>
+            <button
+              className={`stk-toggle ${produit.visibleLanding ? 'on' : ''}`}
+              onClick={() => onUpdate({ visibleLanding: !produit.visibleLanding })}
+            >
+              <span className="stk-toggle-thumb"/>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Promotion ── */}
+        <div className="stk-section-block">
+          <div className="stk-section-title"><SIcon name="tag" size={13}/>Promotion</div>
+          <div className="stk-toggle-row" style={{ marginBottom: produit.promo ? 14 : 0 }}>
+            <div>
+              <div className="stk-toggle-label">Activer une promotion</div>
+              <div className="stk-toggle-sub">
+                {produit.promo ? `Remise de ${produit.promoPercent}% appliquée.` : 'Aucune remise active.'}
+              </div>
+            </div>
+            <button
+              className={`stk-toggle ${produit.promo ? 'on' : ''}`}
+              onClick={() => onUpdate({ promo: !produit.promo })}
+            >
+              <span className="stk-toggle-thumb"/>
+            </button>
+          </div>
+
+          {produit.promo && (
+            <div className="stk-promo-fields">
+              <label className="stk-promo-field">
+                <span>REMISE %</span>
+                <input
+                  type="number" min="1" max="90" value={produit.promoPercent}
+                  onChange={e => onUpdate({ promoPercent: parseInt(e.target.value, 10) || 0 })}
+                />
+              </label>
+              <label className="stk-promo-field">
+                <span>ÉTIQUETTE</span>
+                <select value={produit.promoLabel} onChange={e => onUpdate({ promoLabel: e.target.value })}>
+                  <option value="">Sans étiquette</option>
+                  {PROMO_LABELS.map(l => <option key={l}>{l}</option>)}
+                </select>
+              </label>
+              {promoPrice && (
+                <div className="stk-promo-result">
+                  <span>Prix promo :</span>
+                  <strong>{promoPrice} €</strong>
+                  <span className="stk-promo-original">{produit.prix} €</span>
+                  {produit.promoLabel && <span className="stk-promo-pill">{produit.promoLabel}</span>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="stk-detail-journal-title">Journal d&apos;audit du stock</div>
         <div className="stk-detail-journal-empty">Aucun mouvement enregistré.</div>
       </div>
@@ -226,11 +300,11 @@ function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer }) {
 
 /* ─── Produits tab ─── */
 function ProduitsTab() {
-  const [produits, setProduits]     = useState(SEED_PRODUITS)
-  const [fournisseurs]              = useState(SEED_FOURNISSEURS)
-  const [selected, setSelected]     = useState(null)
-  const [search, setSearch]         = useState('')
-  const [modal, setModal]           = useState(null) // null | 'add' | produit
+  const [produits, setProduits] = useState(SEED_PRODUITS)
+  const [fournisseurs]          = useState(SEED_FOURNISSEURS)
+  const [selected, setSelected] = useState(null)
+  const [search, setSearch]     = useState('')
+  const [modal, setModal]       = useState(null)
 
   const filtered = useMemo(() =>
     produits
@@ -238,18 +312,20 @@ function ProduitsTab() {
       .sort((a, b) => a.nom.localeCompare(b.nom))
   , [produits, search])
 
+  function updateProduit(id, patch) {
+    setProduits(p => p.map(x => x.id === id ? { ...x, ...patch } : x))
+  }
+
   function saveModal(data) {
     if (modal === 'add') {
-      setProduits(p => [...p, { ...data, id: Date.now() }])
+      setProduits(p => [...p, { ...data, id: Date.now(), visibleLanding: true, promo: false, promoPercent: 0, promoLabel: '' }])
     } else {
       setProduits(p => p.map(x => x.id === modal.id ? { ...x, ...data } : x))
-      setSelected(prev => prev?.id === modal.id ? { ...prev, ...data } : prev)
     }
   }
 
   function adjustQty(id, delta) {
     setProduits(p => p.map(x => x.id === id ? { ...x, qty: Math.max(0, x.qty + delta) } : x))
-    if (selected?.id === id) setSelected(prev => ({ ...prev, qty: Math.max(0, prev.qty + delta) }))
   }
 
   function deleteProduit(id) {
@@ -281,11 +357,16 @@ function ProduitsTab() {
             const low = p.qty <= p.alerte
             const isActive = selectedFull?.id === p.id
             return (
-              <div key={p.id} className={['stk-row', isActive && 'active', low && 'low'].filter(Boolean).join(' ')}
+              <div key={p.id} className={['stk-row', isActive && 'active', low && 'low', !p.visibleLanding && 'hidden-landing'].filter(Boolean).join(' ')}
                 onClick={() => setSelected(p)}>
                 <div className="stk-row-icon"><SIcon name="box" size={16}/></div>
                 <div className="stk-row-info">
-                  <div className="stk-row-nom">{p.nom}</div>
+                  <div className="stk-row-nom">
+                    {p.nom}
+                    {p.promo && p.promoPercent > 0 && (
+                      <span className="stk-row-promo-badge">−{p.promoPercent}%{p.promoLabel ? ` · ${p.promoLabel}` : ''}</span>
+                    )}
+                  </div>
                   <div className="stk-row-meta">{p.categorie} · Prix : {p.prix} €</div>
                 </div>
                 <div className="stk-row-qty">
@@ -293,6 +374,13 @@ function ProduitsTab() {
                   <span className={['stk-qty-num', low && 'low'].filter(Boolean).join(' ')}>{p.qty}</span>
                   <button className="stk-qty-btn" onClick={e => { e.stopPropagation(); adjustQty(p.id, +1) }}>+</button>
                 </div>
+                <button
+                  className={`stk-eye-btn ${p.visibleLanding ? 'visible' : 'hidden'}`}
+                  title={p.visibleLanding ? 'Masquer de la landing' : 'Afficher sur la landing'}
+                  onClick={e => { e.stopPropagation(); updateProduit(p.id, { visibleLanding: !p.visibleLanding }) }}
+                >
+                  <SIcon name={p.visibleLanding ? 'eye' : 'eye-off'} size={14}/>
+                </button>
                 <div className="stk-row-chevron"><SIcon name="chevron-right" size={14}/></div>
               </div>
             )
@@ -308,10 +396,11 @@ function ProduitsTab() {
               fournisseurs={fournisseurs}
               onAjuster={() => setModal(selectedFull)}
               onSupprimer={() => deleteProduit(selectedFull.id)}
+              onUpdate={patch => updateProduit(selectedFull.id, patch)}
             />
           : <div className="stk-card stk-empty-panel">
               <SIcon name="box" size={40}/>
-              <p>Sélectionnez un produit de la liste pour voir ses analyses de marge financière et le journal de mouvements de stock.</p>
+              <p>Sélectionnez un produit pour voir ses détails, gérer sa visibilité et configurer ses promotions.</p>
             </div>
         }
       </div>

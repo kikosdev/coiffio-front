@@ -10,11 +10,19 @@ function OwnerRoute({ children }) {
   return role === 'owner' ? children : <Navigate to="/signin" replace />
 }
 
+function GuestRoute({ children }) {
+  const token = localStorage.getItem('haire_token')
+  const role  = localStorage.getItem('haire_role')
+  if (!token) return children
+  const staffRoles = ['owner', 'supervisor', 'staff']
+  return <Navigate to={staffRoles.includes(role) ? '/dashboard' : '/account'} replace />
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signin" element={<GuestRoute><SignIn /></GuestRoute>} />
       <Route path="/account" element={<MyAccount />} />
       <Route path="/book" element={<BookVisit />} />
       <Route path="/dashboard/*" element={<OwnerRoute><SalonDashboard /></OwnerRoute>} />

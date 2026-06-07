@@ -840,3 +840,129 @@
   .heroMarquee { padding-right: 64px; }
   .section, .sectionPaths, .sectionEditorial, .sectionVisit, .sectionBoutique { padding-left: 64px; padding-right: 64px; }
 }
+
+/* ── Tablet landscape (≤1080px) ── */
+@media (max-width: 1080px) {
+  .hero { grid-template-columns: 1fr 0.85fr; }
+  .heroH1 { font-size: 76px; }
+  .heroLeft { padding: 56px 0 56px 40px; }
+  .heroMarquee { padding-right: 40px; gap: 24px; }
+
+  .section, .sectionPaths, .sectionEditorial, .sectionVisit, .sectionBoutique { padding-left: 40px; padding-right: 40px; }
+  .section { padding-top: 80px; padding-bottom: 80px; }
+  .sectionH2 { font-size: 50px; }
+
+  .svcsGrid { grid-template-columns: repeat(3, 1fr); }
+  .stylistRow { grid-template-columns: repeat(2, 1fr); }
+  .testiGrid { grid-template-columns: 1fr 1fr; }
+  .editorialH2, .visitH2 { font-size: 52px; }
+
+  .prodGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tablet portrait / large phone (≤860px) ── */
+@media (max-width: 860px) {
+  /* HERO → stacked */
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .heroLeft {
+    padding: 48px 28px 44px;
+    order: 1;
+  }
+  .heroRight {
+    order: 0;
+    min-height: 380px;
+    aspect-ratio: 16 / 11;
+  }
+  .heroH1 { font-size: clamp(56px, 13vw, 84px); }
+  .indent { padding-left: 1em; }
+  .heroP { font-size: 15px; max-width: 540px; }
+  .heroActions { flex-wrap: wrap; margin-bottom: 44px; }
+  .heroMarquee { padding-right: 0; gap: 20px; }
+  .statV { font-size: 32px; }
+  .heroTag { bottom: 20px; right: 20px; padding: 14px 18px; max-width: 220px; }
+
+  /* SECTION scaffold */
+  .section, .sectionPaths, .sectionEditorial, .sectionVisit, .sectionBoutique {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+  .section { padding-top: 64px; padding-bottom: 64px; }
+  .sectionPaths { padding-top: 56px; padding-bottom: 72px; }
+  .sectionHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .sectionRight { text-align: left; max-width: 540px; }
+  .sectionH2 { font-size: clamp(38px, 9vw, 50px); }
+
+  /* PATHS → 1 col */
+  .pathsGrid { grid-template-columns: 1fr; gap: 16px; }
+  .pathCard { padding: 34px 30px 30px; min-height: 0; }
+  .pcH3 { font-size: 32px; }
+  .pathsH2 { font-size: clamp(40px, 10vw, 60px); }
+
+  /* SERVICES → 2 col */
+  .svcsGrid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .svcH3 { font-size: 30px; bottom: 72px; }
+
+  /* STYLISTS → 2 col */
+  .stylistRow { grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* EDITORIAL → 1 col */
+  .sectionEditorial { grid-template-columns: 1fr; gap: 36px; }
+  .editorialImg { max-width: 460px; aspect-ratio: 4 / 4; }
+  .editorialH2 { font-size: clamp(40px, 10vw, 56px); }
+
+  /* TESTIMONIALS → 1 col */
+  .testiGrid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* VISIT → 1 col */
+  .sectionVisit { grid-template-columns: 1fr; gap: 36px; }
+  .visitH2 { font-size: clamp(40px, 10vw, 56px); }
+  .visitMap { aspect-ratio: 4 / 3.4; }
+
+  /* BOUTIQUE */
+  .prodGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Small phone (≤520px) ── */
+@media (max-width: 520px) {
+  .heroLeft { padding: 40px 18px 40px; }
+  .heroRight { min-height: 320px; }
+  .heroEyebrow { font-size: 10px; letter-spacing: 0.2em; }
+  .heroH1 { margin-bottom: 22px; }
+  .heroActions { gap: 10px; }
+  .heroSecondary { padding: 12px 0; }
+  .heroMarquee { flex-wrap: wrap; gap: 22px 28px; }
+  .statMini { flex: 0 0 40%; }
+
+  .section, .sectionPaths, .sectionEditorial, .sectionVisit, .sectionBoutique {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .section { padding-top: 52px; padding-bottom: 52px; }
+
+  /* SERVICES → 1 col */
+  .svcsGrid { grid-template-columns: 1fr; }
+  .svcTile { aspect-ratio: 16 / 11; }
+  .svcH3 { font-size: 34px; }
+
+  /* STYLISTS → 1 col */
+  .stylistRow { grid-template-columns: 1fr; }
+  .portrait { aspect-ratio: 16 / 11; }
+
+  .pathCard { padding: 28px 22px 26px; }
+  .pcH3 { font-size: 28px; }
+
+  .visitMeta { grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .editorialImg { max-width: none; }
+
+  /* BOUTIQUE → 1 col */
+  .prodGrid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,357 @@
+/* ─── Finance & POS — Section Trésorerie ─── */
+
+.fin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── Top row: tabs + controls ─── */
+.fin-toprow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 0 0 2px;
+  margin-bottom: 28px;
+}
+
+.fin-tabs {
+  display: flex;
+  gap: 0;
+}
+.fin-tab {
+  background: none;
+  border: 0;
+  padding: 10px 20px 12px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.fin-tab:hover  { color: var(--ink); }
+.fin-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+.fin-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+/* Period pills */
+.fin-periods {
+  display: flex;
+  gap: 0;
+  background: var(--surface-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+}
+.fin-period-btn {
+  background: none;
+  border: 0;
+  padding: 5px 14px;
+  font-size: 12.5px;
+  font-family: var(--sans);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: calc(var(--radius-lg) - 2px);
+  transition: background .15s, color .15s;
+  font-weight: 500;
+}
+.fin-period-btn:hover { color: var(--ink); }
+.fin-period-btn.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.fin-csv-btn { white-space: nowrap; }
+
+/* ─── Content wrapper ─── */
+.fin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─── Card base ─── */
+.fin-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+}
+
+.fin-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.fin-card-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.fin-card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ─── Analyses tab ─── */
+.fin-analyses {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* CA Hero card */
+.fin-ca-hero {
+  text-align: center;
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  overflow: visible;
+}
+.fin-ca-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.fin-ca-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1;
+}
+.fin-ca-num {
+  font-family: var(--serif);
+  font-size: 64px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+.fin-ca-cur {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink);
+  opacity: .7;
+}
+.fin-ca-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+.fin-ca-sub strong { color: var(--ink); }
+
+/* Chart placeholder */
+.fin-chart-placeholder {
+  min-height: 220px;
+  background: transparent;
+}
+.fin-chart-sm {
+  min-height: 160px;
+}
+
+/* Two-col */
+.fin-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.fin-method-empty {
+  padding: 60px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--champagne-deep);
+  font-style: italic;
+}
+
+/* ─── Paiements tab ─── */
+.fin-pay-empty {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--champagne-deep);
+  font-style: italic;
+}
+.fin-pay-list { padding: 0 0 8px; }
+.fin-pay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  transition: background .12s;
+}
+.fin-pay-row:hover { background: var(--surface-inset); }
+.fin-pay-client {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.fin-pay-meta { font-size: 12px; color: var(--muted); }
+.fin-pay-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #5a9659;
+  white-space: nowrap;
+}
+
+/* ─── Frais tab ─── */
+.fin-frais-list { padding: 0 0 8px; }
+.fin-frais-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  transition: background .12s;
+}
+.fin-frais-row:hover { background: var(--surface-inset); }
+
+.fin-frais-info { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.fin-frais-titre {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.fin-frais-desc {
+  font-size: 12.5px;
+  color: var(--champagne-deep);
+}
+.fin-frais-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.fin-frais-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+.fin-frais-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #c25e5e;
+  white-space: nowrap;
+}
+.fin-suppr {
+  background: rgba(184,80,80,.1);
+  color: #c25e5e;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 99px;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background .15s;
+  white-space: nowrap;
+}
+.fin-suppr:hover { background: rgba(184,80,80,.2); }
+
+/* ─── Modal ─── */
+.fin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.32);
+  backdrop-filter: blur(6px);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fin-modal {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22);
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.fin-modal-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink);
+  padding: 28px 28px 0;
+}
+.fin-form {
+  padding: 18px 28px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.fin-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.fin-form-label input,
+.fin-form-label textarea {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--ink);
+  font-family: var(--sans);
+  outline: 0;
+  transition: border-color .15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.fin-form-label input:focus,
+.fin-form-label textarea:focus { border-color: var(--champagne); }
+.fin-form-label textarea { resize: vertical; }
+
+.fin-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 16px 28px 24px;
+}
+.fin-cancel {
+  background: none;
+  border: 0;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--sans);
+}
+.fin-cancel:hover { color: var(--ink); }

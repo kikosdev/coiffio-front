@@ -3,6 +3,18 @@ import SIcon from './SIcon'
 import styles from './TopNav.module.css'
 
 export default function TopNav({ signedIn }) {
+  const navigate = useNavigate()
+
+  function handleSection(e, id) {
+    e.preventDefault()
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else {
+      navigate('/#' + id)
+    }
+  }
+
   return (
     <nav className={styles.nav}>
       <Link to="/" className={styles.brand}>
@@ -12,10 +24,10 @@ export default function TopNav({ signedIn }) {
       </Link>
 
       <div className={styles.links}>
-        <Link to="/#services">Services</Link>
-        <Link to="/#stylists">Stylists</Link>
-        <Link to="/#visit">Visit us</Link>
-        <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <a href="#services" onClick={e => handleSection(e, 'services')}>Services</a>
+        <a href="#stylists" onClick={e => handleSection(e, 'stylists')}>Stylists</a>
+        <a href="#visit"    onClick={e => handleSection(e, 'visit')}>Visit us</a>
+        <a href="#boutique" onClick={e => handleSection(e, 'boutique')} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <SIcon name="shopping-bag" size={14} strokeWidth={1.4} />
           Boutique
         </a>

@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
 import TopNav from '../components/TopNav'
 import SiteFooter from '../components/SiteFooter'
 import SIcon from '../components/SIcon'
@@ -242,6 +243,93 @@ function TestimonialsSection() {
   )
 }
 
+const ALL_PRODUCTS = [
+  { id: 1,  cat: 'Shampoo',     name: 'Silk Renewal Shampoo',   tone: 'ph-2', price: 38, size: '250 ml' },
+  { id: 2,  cat: 'Masque',      name: 'Hydra Repair Mask',       tone: 'ph-3', price: 54, size: '200 ml' },
+  { id: 3,  cat: 'Soin',        name: 'Scalp Elixir',            tone: 'ph-5', price: 72, size: '50 ml'  },
+  { id: 4,  cat: 'Styling',     name: 'Texture Sérum',           tone: 'ph-7', price: 44, size: '100 ml' },
+  { id: 5,  cat: 'Couleur',     name: 'Chromo Shield',           tone: 'ph-4', price: 68, size: '300 ml' },
+  { id: 6,  cat: 'Huile',       name: 'Argan Rituel Dry Oil',    tone: 'ph-6', price: 86, size: '30 ml'  },
+  { id: 7,  cat: 'Shampoo',     name: 'Clarifying Reset',        tone: 'ph-3', price: 42, size: '250 ml' },
+  { id: 8,  cat: 'Masque',      name: 'Keratin Bond Masque',     tone: 'ph-2', price: 78, size: '150 ml' },
+  { id: 9,  cat: 'Sérum',       name: 'Split-End Bonder',        tone: 'ph-5', price: 59, size: '75 ml'  },
+  { id: 10, cat: 'Styling',     name: 'Glossing Cream',          tone: 'ph-7', price: 36, size: '120 ml' },
+  { id: 11, cat: 'Cuir chevelu',name: 'Detox Scalp Tonic',       tone: 'ph-4', price: 65, size: '100 ml' },
+  { id: 12, cat: 'Soin',        name: 'Olaplex Bond Repair',     tone: 'ph-6', price: 94, size: '100 ml' },
+  { id: 13, cat: 'Shampoo',     name: 'Silver Brightener',       tone: 'ph-2', price: 46, size: '250 ml' },
+  { id: 14, cat: 'Soin',        name: 'Leave-In Velvet',         tone: 'ph-3', price: 48, size: '200 ml' },
+  { id: 15, cat: 'Huile',       name: 'Camellia Night Oil',      tone: 'ph-5', price: 92, size: '30 ml'  },
+]
+
+function ProductsSection() {
+  const [visible, setVisible] = useState(9)
+  const [loading, setLoading] = useState(false)
+  const sentinelRef = useRef(null)
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loading && visible < ALL_PRODUCTS.length) {
+          setLoading(true)
+          setTimeout(() => {
+            setVisible(v => Math.min(v + 3, ALL_PRODUCTS.length))
+            setLoading(false)
+          }, 600)
+        }
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [loading, visible])
+
+  return (
+    <section className={styles.sectionBoutique} id="boutique">
+      <div className={styles.sectionHead}>
+        <div className={styles.sectionLeft}>
+          <div className={styles.eyebrow}>La Boutique</div>
+          <h2 className={styles.sectionH2}>Our <em>curated</em> selection.</h2>
+        </div>
+        <div className={styles.sectionRight}>
+          <p>Each product on this shelf has been tested, adopted, and trusted by our stylists. Nothing ends up here by chance.</p>
+        </div>
+      </div>
+
+      <div className={styles.prodGrid}>
+        {ALL_PRODUCTS.slice(0, visible).map(p => (
+          <div key={p.id} className={styles.prodCard}>
+            <div className={`ph ${p.tone} ${styles.prodPh}`} />
+            <div className={styles.prodBody}>
+              <div className={styles.prodCat}>{p.cat}</div>
+              <div className={styles.prodName}>{p.name}</div>
+              <div className={styles.prodSize}>{p.size}</div>
+            </div>
+            <div className={styles.prodFoot}>
+              <div className={styles.prodPrice}>€{p.price}</div>
+              <button className={styles.prodAdd}>
+                <SIcon name="shopping-bag" size={13} strokeWidth={1.5} />
+                Add to bag
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {visible < ALL_PRODUCTS.length && (
+        <div ref={sentinelRef} className={styles.prodSentinel}>
+          {loading && <span className={styles.prodSpinner} />}
+        </div>
+      )}
+
+      {visible >= ALL_PRODUCTS.length && (
+        <p className={styles.prodEnd}>— Fin de catalogue —</p>
+      )}
+    </section>
+  )
+}
+
 function VisitSection() {
   return (
     <section className={styles.sectionVisit} id="visit">
@@ -298,6 +386,16 @@ function VisitSection() {
 }
 
 export default function Landing() {
+  const { hash } = useLocation()
+
+  useEffect(() => {
+    if (!hash) return
+    const timer = setTimeout(() => {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    return () => clearTimeout(timer)
+  }, [hash])
+
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh' }}>
       <TopNav />
@@ -308,6 +406,7 @@ export default function Landing() {
       <EditorialSection />
       <TestimonialsSection />
       <VisitSection />
+      <ProductsSection />
       <SiteFooter />
     </div>
   )

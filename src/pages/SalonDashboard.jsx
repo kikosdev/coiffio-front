@@ -1,9 +1,15 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SIcon from '../components/SIcon'
 import { useNotifications } from '../hooks/useNotifications'
 import { disconnectSocket } from '../services/socket'
 import './SalonDashboard.css'
+import TeamScreen from './team/TeamScreen'
+import FinanceScreen from './finance/FinanceScreen'
+import StockScreen from './stock/StockScreen'
+import VentesScreen from './ventes/VentesScreen'
+import SettingsScreen from './settings/SettingsScreen'
+import ServicesScreen from './services/ServicesScreen'
 
 /* ═══════════════════════════════════════════════════════════
    SHARED DATA
@@ -44,6 +50,125 @@ const fmtHr = (h) => {
   const hr = Math.floor(h)
   const mn = Math.round((h - hr) * 60)
   return `${hr.toString().padStart(2,'0')}:${mn.toString().padStart(2,'0')}`
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OVERVIEW SCREEN (Accueil)
+═══════════════════════════════════════════════════════════ */
+
+const LOW_STOCK = [
+  { name: 'Metal Detox Anti-Metal Cleansing Cream', qty: 3, threshold: 5 },
+  { name: 'Tecni.Art Savage Panache Hairspray',     qty: 2, threshold: 5 },
+]
+
+function OverviewScreen({ setCurrent }) {
+  const now = new Date()
+  const day = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
+  const dayCapital = day.charAt(0).toUpperCase() + day.slice(1)
+
+  const kpis = [
+    { label:"Chiffre d'affaires", icon:'credit-card',  value:'0 €', trend:'↑12%', pos:true  },
+    { label:'Rendez-vous du jour', icon:'calendar-days', value:'0',   trend:'↑8%',  pos:true  },
+    { label:'Ventes encaissées',   icon:'shopping-bag',  value:'0',   trend:'↑15%', pos:true  },
+    { label:'Alertes stock bas',   icon:'package',       value:'2',   trend:'+2',   pos:false },
+  ]
+
+  return (
+    <div className="sh-page sh-overview">
+      {/* Header */}
+      <div className="sh-ov-header">
+        <div>
+          <h2 className="sh-ov-greeting">Bonjour, <em>Maria Galland</em></h2>
+          <p className="sh-ov-sub">Voici l'activité de votre salon pour aujourd'hui, le {dayCapital}.</p>
+        </div>
+        <div className="sh-ov-actions">
+          <button className="sh-btn sh-btn-gold" onClick={() => setCurrent('schedule')}>
+            <SIcon name="calendar-plus" size={14}/>Nouveau RDV
+          </button>
+          <button className="sh-btn" onClick={() => setCurrent('finance')}>
+            <SIcon name="banknote" size={14}/>Encaisser RDV
+          </button>
+          <button className="sh-btn">
+            <SIcon name="user-plus" size={14}/>Ajouter Client
+          </button>
+          <button className="sh-btn" onClick={() => setCurrent('boutique')}>
+            <SIcon name="package" size={14}/>Ajuster Stock
+          </button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="sh-ov-kpis">
+        {kpis.map((k, i) => (
+          <div key={i} className="sh-ov-kpi">
+            <div className="sh-ov-kpi-top">
+              <span className="sh-ov-kpi-label">{k.label.toUpperCase()}</span>
+              <span className="sh-ov-kpi-icon"><SIcon name={k.icon} size={16}/></span>
+            </div>
+            <div className="sh-ov-kpi-value">{k.value}</div>
+            <span className={'sh-ov-kpi-trend' + (k.pos ? ' pos' : ' neg')}>{k.trend}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Body */}
+      <div className="sh-ov-body">
+        {/* Today's appointments */}
+        <div className="sh-card sh-ov-appts">
+          <div className="sh-card-head">
+            <div>
+              <h3>Rendez-vous aujourd'hui</h3>
+              <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--muted)' }}>Liste chronologique des créneaux planifiés.</p>
+            </div>
+          </div>
+          <div className="sh-ov-empty">Aucun rendez-vous planifié pour aujourd'hui.</div>
+        </div>
+
+        {/* Right column */}
+        <div className="sh-ov-right">
+          {/* Stock alerts */}
+          <div className="sh-card sh-ov-stock">
+            <div className="sh-card-head">
+              <div>
+                <h3>Alertes de Stock Bas</h3>
+                <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--muted)' }}>Produits devant faire l'objet d'un réapprovisionnement.</p>
+              </div>
+            </div>
+            <div className="sh-ov-stock-list">
+              {LOW_STOCK.map((p, i) => (
+                <div key={i} className="sh-ov-stock-row">
+                  <div>
+                    <div className="sh-ov-stock-name">{p.name}</div>
+                    <div className="sh-ov-stock-sub">Stock restant : <strong>{p.qty}</strong> (Alerte à {p.threshold})</div>
+                  </div>
+                  <span className="sh-ov-alert-badge">Alerte</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Revenue distribution */}
+          <div className="sh-card sh-ov-distrib">
+            <h3 style={{ fontFamily:'var(--serif)', fontWeight:500, fontSize:17, marginBottom:16 }}>Distribution de l'Activité</h3>
+            <div className="sh-ov-distrib-rows">
+              {[
+                { label:'CA Espèces',           value:'0 €' },
+                { label:'CA Carte Bancaire',     value:'0 €' },
+                { label:'CA Paiements Mobiles',  value:'0 €' },
+              ].map((r, i) => (
+                <div key={i} className="sh-ov-distrib-row">
+                  <span>{r.label}</span><span>{r.value}</span>
+                </div>
+              ))}
+              <div className="sh-ov-distrib-row total">
+                <span>Total Encaissé</span><span>0 €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -621,143 +746,7 @@ function CaisseScreen({ role }) {
   )
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SERVICES SCREEN
-═══════════════════════════════════════════════════════════ */
-
-const SERVICES = [
-  { id:1,  audience:['universal'], section:'cuts',       name:'Signature Cut',       desc:'Consultation, precision cut, and bespoke finish with our most senior stylist.',                         dur:'60 min', from:78,  tags:[],       featured:false },
-  { id:2,  audience:['universal'], section:'cuts',       name:'Express Refresh',     desc:'A 30-minute trim and re-shape between full visits.',                                                   dur:'30 min', from:42,  tags:[] },
-  { id:3,  audience:['universal'], section:'treatments', name:'Olaplex Bond Builder', desc:'Repairs broken bonds at the deepest level — restores elasticity and shine after any chemical service.', dur:'45 min', from:95,  tags:['gold'], featured:true },
-  { id:10, audience:['women'],     section:'color',      name:'Signature Balayage',  desc:'Hand-painted lightening tailored to your features, finished with a tone-true gloss.',                  dur:'2h 30m', from:240, tags:['gold'], featured:true },
-  { id:11, audience:['women'],     section:'color',      name:'Full Permanent Color', desc:'Root-to-tip permanent color with bond-protective additive.',                                           dur:'1h 45m', from:145, tags:[] },
-  { id:12, audience:['women'],     section:'color',      name:'Couture Highlights',  desc:'Foil-by-foil hand placement for editorial dimension.',                                                  dur:'3h',     from:285, tags:['gold'] },
-  { id:13, audience:['women'],     section:'color',      name:'Glossing Service',    desc:'A standalone toner to refresh hue and add mirror finish.',                                              dur:'30 min', from:60,  tags:[] },
-  { id:14, audience:['women'],     section:'treatments', name:'Keratin Smoothing',   desc:'Long-lasting smoothing that tames frizz — formaldehyde-free formula.',                                  dur:'2h 30m', from:280, tags:['gold'] },
-  { id:15, audience:['women'],     section:'treatments', name:'Scalp & Sound Ritual', desc:'A 60-minute scalp massage paired with tonal sound therapy in our private spa room.',                  dur:'60 min', from:110, tags:['gold'] },
-  { id:16, audience:['women'],     section:'styling',    name:'Editorial Blowout',   desc:'A camera-ready finish: round-brush sculpting and styling for photo, event, or evening.',               dur:'45 min', from:75,  tags:[] },
-  { id:17, audience:['women'],     section:'styling',    name:'Bridal & Event',      desc:'Trial and day-of styling with optional hairpiece work.',                                                dur:'2h',     from:220, tags:['gold'] },
-  { id:20, audience:['men'],       section:'cuts',       name:'Classic Gentleman',   desc:'Scissor-over-comb cut with a hot-towel finish and complimentary scalp massage.',                       dur:'45 min', from:65,  tags:[] },
-  { id:21, audience:['men'],       section:'cuts',       name:'Skin Fade',           desc:'Precision clipper fade with detailed line-up, blended to your preferred grade.',                       dur:'45 min', from:55,  tags:[] },
-  { id:22, audience:['men'],       section:'grooming',   name:'Beard Sculpt',        desc:'Shape, line, and condition — finished with our house tonic.',                                           dur:'30 min', from:35,  tags:[] },
-  { id:23, audience:['men'],       section:'grooming',   name:'Royal Shave',         desc:'Traditional straight-razor shave, three hot towels, balm, and finish.',                                dur:'45 min', from:75,  tags:['gold'], featured:true },
-  { id:24, audience:['men'],       section:'treatments', name:'Anti-Grey Tinting',   desc:'A discreet tint that softens grey by 50% — washes out in 4-6 weeks.',                                 dur:'30 min', from:45,  tags:[] },
-]
-
-const SVC_SECTIONS = [
-  { id:'cuts',       num:'I.',   title:<>The <em>Cut</em></>,     lead:'Foundational' },
-  { id:'color',      num:'II.',  title:<>The <em>Color</em></>,   lead:'Tonal · Dimensional' },
-  { id:'grooming',   num:'III.', title:<>The <em>Groom</em></>,   lead:'Beard · Shave · Skin' },
-  { id:'treatments', num:'IV.',  title:<>The <em>Ritual</em></>,  lead:'Treatment · Spa' },
-  { id:'styling',    num:'V.',   title:<>The <em>Finish</em></>,  lead:'Styling · Event' },
-]
-
-const SVC_FILTERS = [
-  { id:'all', label:'All' }, { id:'women', label:'Women' },
-  { id:'universal', label:'Universal' }, { id:'men', label:'Men' },
-]
-
-function ServicesScreen() {
-  const [filter, setFilter] = useState('all')
-  const [glide, setGlide]   = useState({ left:4, width:0 })
-  const filterRef           = useRef(null)
-
-  useEffect(() => {
-    if (!filterRef.current) return
-    const btn = filterRef.current.querySelector('button.on')
-    if (btn) {
-      const r  = btn.getBoundingClientRect()
-      const pr = filterRef.current.getBoundingClientRect()
-      setGlide({ left: r.left - pr.left, width: r.width })
-    }
-  }, [filter])
-
-  const filtered  = SERVICES.filter(s => filter === 'all' ? true : s.audience.includes(filter))
-  const bySection = SVC_SECTIONS.map(sec => ({
-    ...sec, items: filtered.filter(s => s.section === sec.id),
-  })).filter(s => s.items.length > 0)
-
-  return (
-    <div className="sh-page">
-      <div className="sh-svc-head">
-        <div>
-          <div className="sh-eyebrow" style={{marginBottom:6}}>Spring · Summer 26</div>
-          <h2 className="sh-serif" style={{fontSize:44, margin:0, fontWeight:500, lineHeight:1.05, letterSpacing:'-0.02em', fontFamily:'var(--serif)'}}>
-            La <em style={{fontStyle:'italic', color:'var(--champagne-deep)'}}>Carte</em>
-          </h2>
-          <p style={{margin:'8px 0 0', color:'var(--muted)', fontSize:13.5, maxWidth:540, lineHeight:1.5}}>
-            Our complete services menu. Every service is performed by a senior or master stylist.
-          </p>
-        </div>
-        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:10}}>
-          <div className="sh-svc-filter" ref={filterRef}>
-            <div className="sh-svc-glide" style={{ left: glide.left, width: glide.width }} />
-            {SVC_FILTERS.map(f => (
-              <button key={f.id} className={filter === f.id ? 'on' : ''} onClick={() => setFilter(f.id)}>{f.label}</button>
-            ))}
-          </div>
-          <div style={{display:'flex', gap:6}}>
-            <button className="sh-btn sh-btn-sm sh-btn-ghost"><SIcon name="sliders-horizontal" size={13}/>Duration</button>
-            <button className="sh-btn sh-btn-sm sh-btn-ghost"><SIcon name="euro" size={13}/>Price</button>
-            <button className="sh-btn sh-btn-sm sh-btn-ghost"><SIcon name="user-round" size={13}/>By stylist</button>
-          </div>
-        </div>
-      </div>
-
-      <div className="sh-gold-rule" />
-
-      {bySection.map(sec => (
-        <section key={sec.id} className="sh-svc-section">
-          <div className="sh-svc-section-head">
-            <span className="num-mark">{sec.num}</span>
-            <h3>{sec.title}</h3>
-            <span className="slead">{sec.lead}</span>
-          </div>
-          <div className="sh-svc-grid">
-            {sec.items.map(s => (
-              <div key={s.id} className={'sh-svc-item' + (s.featured ? ' featured' : '')}>
-                <div>
-                  <div className="sh-svc-name-row">
-                    <span className="sh-svc-name">{s.name}</span>
-                    {s.tags.includes('gold') && <span className="sh-svc-tag gold">Signature</span>}
-                    {s.audience.includes('women')    && <span className="sh-svc-tag">Women</span>}
-                    {s.audience.includes('men')      && <span className="sh-svc-tag">Men</span>}
-                    {s.audience.includes('universal')&& <span className="sh-svc-tag">Universal</span>}
-                  </div>
-                  <div className="sh-svc-desc">{s.desc}</div>
-                  <div className="sh-svc-meta">
-                    <span><SIcon name="clock" size={12}/>{s.dur}</span>
-                    <span><SIcon name="users" size={12}/>Senior stylist</span>
-                    {s.featured && <span style={{color:'var(--champagne-deep)'}}><SIcon name="star" size={12}/>House signature</span>}
-                  </div>
-                </div>
-                <div className="sh-svc-right">
-                  <div className="sh-svc-price">
-                    <span className="from">From</span>
-                    €{s.from}
-                  </div>
-                  <button className="sh-btn sh-btn-sm sh-svc-add">
-                    <SIcon name="calendar-plus" size={13}/>Book
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-
-      <div style={{marginTop:30, padding:'28px 32px', background:'var(--surface)', border:'1px solid var(--line)', borderRadius:'var(--radius-lg)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:24}}>
-        <div style={{maxWidth:560}}>
-          <div className="sh-eyebrow">Bespoke</div>
-          <div className="sh-serif" style={{fontSize:24, marginTop:6, lineHeight:1.15}}>
-            Can't find what you're after? Our <em style={{fontStyle:'italic', color:'var(--champagne-deep)'}}>directrices</em> design custom rituals on request.
-          </div>
-        </div>
-        <button className="sh-btn sh-btn-gold"><SIcon name="message-circle" size={14}/>Request a consultation</button>
-      </div>
-    </div>
-  )
-}
+/* Services management screen is in its own file */
 
 /* ═══════════════════════════════════════════════════════════
    BOUTIQUE SCREEN
@@ -1010,31 +999,316 @@ function NotifBell() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   CLIENTS CRM SCREEN
+═══════════════════════════════════════════════════════════ */
+
+const MOCK_CLIENTS = [
+  { id:1, nom:'Alice Dubois',     phone:'+33 6 45 89 23 11', email:'alice.dubois@gmail.com',   notes:'Prefers mild organic shampoos. Always orders tea.',   ca:1240, visits:8,  lastVisit:'2026-05-28' },
+  { id:2, nom:'Béatrice Morel',   phone:'+33 6 56 12 90 44', email:'b.morel@gmail.com',          notes:'Allergie nickel — éviter bijoux.',                    ca:680,  visits:5,  lastVisit:'2026-05-15' },
+  { id:3, nom:'Catherine Petit',  phone:'+33 6 34 78 56 12', email:'catherine.petit@pro.fr',     notes:'',                                                    ca:920,  visits:6,  lastVisit:'2026-06-01' },
+  { id:4, nom:'Damien Vasseur',   phone:'+33 6 78 89 01 22', email:'d.vasseur@icloud.com',       notes:'Client fidèle depuis 2019.',                          ca:2100, visits:18, lastVisit:'2026-05-30' },
+  { id:5, nom:'kikos dev',        phone:'+21693418192',       email:'kikosdev@gmail.com',         notes:'',                                                    ca:0,    visits:0,  lastVisit:null },
+  { id:6, nom:'Élodie Roussel',   phone:'+33 6 12 90 34 78', email:'elodie.roussel@email.fr',    notes:'VIP · priorité agenda.',                              ca:3450, visits:24, lastVisit:'2026-06-03' },
+]
+
+const VISIT_HISTORY = {
+  1: [
+    { date:'2026-05-28', heure:'14:00', service:'Balayage signature',    stylist:'Léa Dubois',    montant:240, status:'completed' },
+    { date:'2026-04-10', heure:'10:30', service:'Glossing + coupe',      stylist:'Léa Dubois',    montant:155, status:'completed' },
+    { date:'2026-03-02', heure:'11:00', service:'Olaplex Bond Builder',   stylist:'Nadia Hassan',  montant:95,  status:'completed' },
+    { date:'2026-01-20', heure:'15:00', service:'Balayage + soin',        stylist:'Léa Dubois',    montant:310, status:'completed' },
+  ],
+  2: [
+    { date:'2026-05-27', heure:'18:00', service:'Brushing Couture',       stylist:'Sophie Martin', montant:45,  status:'pending'   },
+    { date:'2026-05-24', heure:'10:00', service:'Coupe Femme Éditoriale', stylist:'Maria Galland', montant:65,  status:'completed' },
+    { date:'2026-03-28', heure:'09:30', service:'Keratin smoothing',      stylist:'Nadia Hassan',  montant:280, status:'completed' },
+  ],
+  3: [
+    { date:'2026-06-01', heure:'16:00', service:'Editorial Blowout',      stylist:'Théo Roux',     montant:75,  status:'completed' },
+    { date:'2026-04-22', heure:'13:00', service:'Full Permanent Color',    stylist:'Léa Dubois',    montant:145, status:'completed' },
+    { date:'2026-03-10', heure:'11:30', service:'Express Refresh',         stylist:'Théo Roux',     montant:42,  status:'completed' },
+  ],
+  4: [
+    { date:'2026-05-30', heure:'10:00', service:'Classic Gentleman',       stylist:'Marcus Voss',   montant:65,  status:'completed' },
+    { date:'2026-05-05', heure:'14:00', service:'Beard Sculpt + Cut',      stylist:'Marcus Voss',   montant:100, status:'completed' },
+    { date:'2026-04-15', heure:'11:00', service:'Royal Shave',             stylist:'Marcus Voss',   montant:75,  status:'pending'   },
+    { date:'2026-03-22', heure:'09:00', service:'Skin Fade',               stylist:'Marcus Voss',   montant:55,  status:'completed' },
+  ],
+  5: [],
+  6: [
+    { date:'2026-06-03', heure:'13:00', service:'Couture Highlights',      stylist:'Léa Dubois',    montant:285, status:'completed' },
+    { date:'2026-05-12', heure:'15:00', service:'Scalp & Sound Ritual',    stylist:'Nadia Hassan',  montant:110, status:'completed' },
+    { date:'2026-04-28', heure:'10:00', service:'Bridal & Event',          stylist:'Théo Roux',     montant:220, status:'completed' },
+    { date:'2026-04-01', heure:'11:00', service:'Balayage signature',      stylist:'Léa Dubois',    montant:240, status:'completed' },
+  ],
+}
+
+function clInitials(nom) {
+  const parts = nom.trim().split(' ')
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : nom.slice(0, 2).toUpperCase()
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' })
+}
+
+function fmtDateLong(iso) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' })
+}
+
+function ClientDetail({ client, onEdit, onDelete }) {
+  const history = VISIT_HISTORY[client.id] || []
+
+  return (
+    <div className="sh-cl-detail">
+      {/* Section header */}
+      <div className="sh-cl-det-topbar">
+        <span className="sh-cl-det-section-title">Détails du Client</span>
+        <div style={{ display:'flex', gap:8 }}>
+          <button className="sh-btn sh-btn-sm" onClick={onEdit}>Modifier</button>
+          <button className="sh-btn sh-btn-sm sh-btn-danger" onClick={onDelete}>Supprimer</button>
+        </div>
+      </div>
+
+      {/* Profile */}
+      <div className="sh-cl-det-profile">
+        <div className="sh-cl-av-lg">{clInitials(client.nom)}</div>
+        <div className="sh-cl-det-info">
+          <div className="sh-cl-det-name">{client.nom}</div>
+          <div className="sh-cl-det-sub">{client.email}</div>
+          <div className="sh-cl-det-sub">{client.phone}</div>
+        </div>
+      </div>
+
+      {client.notes && (
+        <div className="sh-cl-det-note">
+          Notes : <em>"{client.notes}"</em>
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="sh-cl-stats">
+        <div className="sh-cl-stat">
+          <div className="sh-cl-stat-lbl">VISITES</div>
+          <div className="sh-cl-stat-val">{client.visits || 0}</div>
+        </div>
+        <div className="sh-cl-stat">
+          <div className="sh-cl-stat-lbl">CA TOTAL</div>
+          <div className="sh-cl-stat-val sh-cl-stat-ca">
+            {client.ca > 0 ? <>{client.ca} <span>€</span></> : '—'}
+          </div>
+        </div>
+        <div className="sh-cl-stat">
+          <div className="sh-cl-stat-lbl">DERNIER</div>
+          <div className="sh-cl-stat-val sh-cl-stat-date">{fmtDate(client.lastVisit)}</div>
+        </div>
+      </div>
+
+      {/* History */}
+      <div className="sh-cl-hist">
+        <div className="sh-cl-hist-title">Historique des rendez-vous</div>
+        {history.length === 0 ? (
+          <div className="sh-cl-hist-empty">Aucune visite enregistrée.</div>
+        ) : (
+          <div className="sh-cl-hist-list">
+            {history.map((v, i) => (
+              <div key={i} className="sh-cl-hist-row">
+                <div className="sh-cl-hist-left">
+                  <div className="sh-cl-hist-name">{v.service}</div>
+                  <div className="sh-cl-hist-who">
+                    Le {fmtDateLong(v.date)} à {v.heure} • avec {v.stylist}
+                  </div>
+                </div>
+                <div className="sh-cl-hist-right">
+                  <div className="sh-cl-hist-amt">{v.montant} €</div>
+                  <span className={'sh-cl-badge ' + (v.status === 'pending' ? 'pending' : 'completed')}>
+                    {v.status === 'pending' ? 'Pending' : 'Completed'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function AddClientModal({ onClose, onAdd, initial }) {
+  const [form, setForm] = useState({ nom: initial?.nom || '', phone: initial?.phone || '', email: initial?.email || '', notes: initial?.notes || '' })
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const isEdit = !!initial?.id
+
+  function submit(e) {
+    e.preventDefault()
+    if (!form.nom.trim()) return
+    onAdd({ ...form, id: isEdit ? initial.id : Date.now(), ca: initial?.ca || 0, visits: initial?.visits || 0, lastVisit: initial?.lastVisit || null })
+    onClose()
+  }
+
+  return (
+    <div className="sh-cl-modal-overlay" onClick={onClose}>
+      <div className="sh-cl-modal" onClick={e => e.stopPropagation()}>
+        <form onSubmit={submit} className="sh-cl-form">
+          <div className="sh-cl-modal-title">
+            <em>{isEdit ? 'Modifier le Client' : 'Enregistrer un Client'}</em>
+          </div>
+
+          <label className="sh-cl-form-label">NOM COMPLET *
+            <input value={form.nom} onChange={e => set('nom', e.target.value)} placeholder="Béatrice Morel" required/>
+          </label>
+          <label className="sh-cl-form-label">TÉLÉPHONE
+            <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+33 6 12 34 56 78"/>
+          </label>
+          <label className="sh-cl-form-label">EMAIL
+            <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="beatrice@yahoo.fr"/>
+          </label>
+          <label className="sh-cl-form-label">NOTES / PRÉFÉRENCES
+            <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Coupe balayage, préfère le thé…" rows={3}/>
+          </label>
+
+          <div className="sh-cl-form-actions">
+            <button type="button" className="sh-cl-cancel" onClick={onClose}>Annuler</button>
+            <button type="submit" className="sh-btn sh-btn-gold">
+              {isEdit ? 'Enregistrer' : 'Enregistrer'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function ClientsScreen() {
+  const [clients,  setClients]  = useState(MOCK_CLIENTS)
+  const [selected, setSelected] = useState(null)
+  const [search,   setSearch]   = useState('')
+  const [modal,    setModal]    = useState(null) // null | 'add' | client (for edit)
+
+  const filtered = clients.filter(c => {
+    const q = search.toLowerCase()
+    return !q || c.nom.toLowerCase().includes(q) || c.phone.includes(q) || c.email.toLowerCase().includes(q)
+  })
+
+  function saveClient(c) {
+    setClients(prev => prev.some(x => x.id === c.id) ? prev.map(x => x.id === c.id ? c : x) : [...prev, c])
+    setSelected(c)
+  }
+
+  function deleteClient(c) {
+    setClients(prev => prev.filter(x => x.id !== c.id))
+    setSelected(null)
+  }
+
+  return (
+    <div className="sh-page sh-clients">
+      <div className="sh-cl-layout">
+        {/* ── Left: list ── */}
+        <div className="sh-cl-panel">
+          <div className="sh-cl-panel-head">
+            <div>
+              <h3>Fichier Clients</h3>
+              <p>Gérez les fiches clients et suivez leur fidélité.</p>
+            </div>
+            <button className="sh-btn sh-btn-gold" onClick={() => setModal('add')}>
+              <SIcon name="plus" size={14}/>Ajouter Client
+            </button>
+          </div>
+
+          <div className="sh-cl-search">
+            <SIcon name="search" size={14}/>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher par nom, téléphone, email…"
+            />
+          </div>
+
+          <div className="sh-cl-list">
+            {filtered.length === 0 && (
+              <div className="sh-ov-empty">Aucun client trouvé.</div>
+            )}
+            {filtered.map(c => (
+              <button
+                key={c.id}
+                className={'sh-cl-row' + (selected?.id === c.id ? ' active' : '')}
+                onClick={() => setSelected(c)}
+              >
+                <div className="sh-cl-av">{clInitials(c.nom)}</div>
+                <div className="sh-cl-row-info">
+                  <span className="sh-cl-name">{c.nom}</span>
+                  <span className="sh-cl-phone">{c.phone}</span>
+                </div>
+                <SIcon name="chevron-right" size={15} style={{color:'var(--muted)', flexShrink:0}}/>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Right: detail ── */}
+        <div className="sh-cl-detail-panel">
+          {selected ? (
+            <ClientDetail
+              client={selected}
+              onEdit={() => setModal(selected)}
+              onDelete={() => deleteClient(selected)}
+            />
+          ) : (
+            <div className="sh-cl-empty">
+              <SIcon name="users" size={40} style={{opacity:.25, marginBottom:14}}/>
+              <p>Sélectionnez un client dans la liste pour voir sa fiche détaillée, son chiffre d'affaires cumulé et son historique de visites.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {modal && (
+        <AddClientModal
+          onClose={() => setModal(null)}
+          onAdd={saveClient}
+          initial={modal === 'add' ? null : modal}
+        />
+      )}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════
    APP SHELL
 ═══════════════════════════════════════════════════════════ */
 
-const NAV_PRIMARY = [
-  { id:'schedule', label:'Schedule',  icon:'calendar-days', badge:17 },
-  { id:'caisse',   label:'La Caisse', icon:'wallet' },
-  { id:'services', label:'Services',  icon:'sparkles' },
-  { id:'boutique', label:'Boutique',  icon:'shopping-bag', badge:3 },
-]
-const NAV_SECONDARY = [
-  { id:'clients',  label:'Clients',  icon:'users' },
-  { id:'reports',  label:'Reports',  icon:'line-chart' },
-  { id:'settings', label:'Settings', icon:'settings' },
+const NAV_ITEMS = [
+  { id:'accueil',  label:'Accueil',       icon:'house' },
+  { id:'schedule', label:'Rendez-vous',   icon:'calendar-check' },
+  { id:'clients',  label:'Clients',       icon:'users' },
+  { id:'team',     label:'Équipe',        icon:'user-cog' },
+  { id:'services', label:'Services',      icon:'scissors' },
+  { id:'finance',  label:'Finance & POS', icon:'credit-card' },
+  { id:'stock',    label:'Stock',         icon:'package' },
+  { id:'ventes',   label:'Ventes',        icon:'shopping-bag' },
+  { id:'settings', label:'Paramètres',    icon:'settings' },
 ]
 
 const TOPBAR_META = {
-  schedule: { crumb:'Operations / Booking',  title:<>The <em>Day</em></>,       sub:'Live calendar — all stylists' },
-  caisse:   { crumb:'Operations / Finance',  title:<>La <em>Caisse</em></>,     sub:'Daily till & flow' },
-  services: { crumb:'Catalogue / Services',  title:<>The <em>Carte</em></>,     sub:'Services & treatments' },
-  boutique: { crumb:'Retail / Boutique',     title:<>The <em>Boutique</em></>,  sub:'Curated retail' },
+  accueil:  { crumb:'Salon / Accueil',       title:<>Tableau de <em>bord</em></>, sub:"Vue d'ensemble du salon" },
+  schedule: { crumb:'Operations / Booking',  title:<>The <em>Day</em></>,         sub:'Live calendar — all stylists' },
+  finance:  { crumb:'Operations / Finance',  title:<>POS &amp; <em>Trésorerie</em></>, sub:'Analyses · paiements · dépenses' },
+  services: { crumb:'Catalogue / Services',  title:<>The <em>Carte</em></>,       sub:'Services & treatments' },
+  ventes:   { crumb:'Retail / Ventes',       title:<>Caisse <em>Revente</em></>,  sub:'Ventes directes · tickets · palmarès' },
+  team:     { crumb:'People / Équipe',        title:<><em>Collaborateurs</em></>,  sub:'Horaires · congés · équipe' },
+  clients:  { crumb:'Gestion / Clients',     title:<>Clients <em>CRM</em></>,     sub:'Fiches · historique · fidélité' },
+  stock:    { crumb:'Gestion / Inventaire', title:<>Stocks <em>&amp; Produits</em></>, sub:'Inventaire · fournisseurs · marges' },
+  settings: { crumb:'Salon / Configuration', title:<><em>Configuration</em></>,       sub:'Établissement · taxes · horaires' },
 }
 
 export default function SalonDashboard() {
   const navigate    = useNavigate()
-  const [current,   setCurrent]   = useState('schedule')
+  const [current,   setCurrent]   = useState('accueil')
   const [role,      setRole]      = useState('employee')
   const [collapsed, setCollapsed] = useState(false)
 
@@ -1045,53 +1319,50 @@ export default function SalonDashboard() {
     navigate('/signin')
   }
 
-  const meta    = TOPBAR_META[current] || TOPBAR_META.schedule
+  const meta    = TOPBAR_META[current] || TOPBAR_META.accueil
   const appCls  = ['sh-app', collapsed ? 'sh-collapsed' : ''].filter(Boolean).join(' ')
 
   return (
     <div className={appCls}>
       {/* ── Sidebar ── */}
       <aside className="sh-sb">
+        {/* Fold toggle — sits on the right edge */}
+        <button
+          className="sh-sb-toggle"
+          onClick={() => setCollapsed(c => !c)}
+          title={collapsed ? 'Déplier le menu' : 'Plier le menu'}>
+          <SIcon name={collapsed ? 'chevron-right' : 'chevron-left'} size={14}/>
+        </button>
+
+        {/* Brand */}
         <div className="sh-brand">
-          <span className="mark">H</span>
-          {!collapsed && <span className="mark mark-rest">aire</span>}
-          <span className="dot" />
-          {!collapsed && <span className="sub">Salon</span>}
-        </div>
-
-        {!collapsed && <div className="sh-section">Operations</div>}
-        <div className="sh-nav">
-          {NAV_PRIMARY.map(n => (
-            <button key={n.id} className={'sh-item' + (current === n.id ? ' active' : '')}
-              onClick={() => setCurrent(n.id)} title={collapsed ? n.label : ''}>
-              <span className="sh-icon"><SIcon name={n.icon} size={17}/></span>
-              <span className="sh-label">{n.label}</span>
-              {n.badge && <span className="sh-badge">{n.badge}</span>}
-            </button>
-          ))}
-        </div>
-
-        {!collapsed && <div className="sh-section">Manage</div>}
-        <div className="sh-nav">
-          {NAV_SECONDARY.map(n => (
-            <button key={n.id} className="sh-item" title={collapsed ? n.label : ''}>
-              <span className="sh-icon"><SIcon name={n.icon} size={17}/></span>
-              <span className="sh-label">{n.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="sh-user">
-          <div className="sh-av">O</div>
-          <div className="sh-uinfo">
-            <div className="un">Owner</div>
-            <div className="ur">Salon Manager</div>
+          <div className="sh-brand-row">
+            <span className="mark">H</span>
+            {!collapsed && <><span className="mark mark-rest">aire</span><span className="dot"/></>}
           </div>
-          {!collapsed && (
-            <button className="sh-logout" onClick={logout} title="Sign out">
-              <SIcon name="log-out" size={15}/>
+          {!collapsed && <span className="sub">Ivory Éditorial</span>}
+        </div>
+
+        {/* Unified nav */}
+        {!collapsed && <div className="sh-section">Navigation</div>}
+        <div className="sh-nav">
+          {NAV_ITEMS.map(n => (
+            <button key={n.id}
+              className={'sh-item' + (current === n.id ? ' active' : '')}
+              onClick={() => setCurrent(n.id)}
+              title={collapsed ? n.label : ''}>
+              <span className="sh-icon"><SIcon name={n.icon} size={17}/></span>
+              <span className="sh-label">{n.label}</span>
             </button>
-          )}
+          ))}
+        </div>
+
+        {/* Déconnexion */}
+        <div className="sh-bottom">
+          <button className="sh-item sh-deconnexion" onClick={logout} title={collapsed ? 'Déconnexion' : ''}>
+            <span className="sh-icon"><SIcon name="log-out" size={17}/></span>
+            <span className="sh-label">Déconnexion</span>
+          </button>
         </div>
       </aside>
 
@@ -1099,9 +1370,6 @@ export default function SalonDashboard() {
       <main className="sh-main">
         {/* Topbar */}
         <header className="sh-topbar">
-          <button className="sh-icon-btn" onClick={() => setCollapsed(c => !c)} title="Toggle sidebar">
-            <SIcon name={collapsed ? 'panel-left-open' : 'panel-left-close'} size={18}/>
-          </button>
           <div className="sh-tb-title">
             <h1>{meta.title}</h1>
             <span className="sh-crumb">— {meta.sub}</span>
@@ -1109,15 +1377,9 @@ export default function SalonDashboard() {
           <div className="sh-tb-actions">
             <div className="sh-search">
               <SIcon name="search" size={14}/>
-              <input placeholder="Search clients, services, products…"/>
+              <input placeholder="Rechercher clients, services, produits…"/>
               <kbd>⌘K</kbd>
             </div>
-            {current === 'caisse' && (
-              <div className="sh-seg" style={{ marginLeft:4 }}>
-                <button className={role==='employee'?'on':''} onClick={() => setRole('employee')}>Employee</button>
-                <button className={role==='manager'?'on':''} onClick={() => setRole('manager')}>Manager</button>
-              </div>
-            )}
             <NotifBell/>
           </div>
         </header>
@@ -1125,10 +1387,15 @@ export default function SalonDashboard() {
         {/* Screen content */}
         <div className="sh-scroll">
           <div key={current} className="fade-up">
+            {current === 'accueil'  && <OverviewScreen setCurrent={setCurrent}/>}
             {current === 'schedule' && <ScheduleScreen />}
-            {current === 'caisse'   && <CaisseScreen role={role}/>}
+            {current === 'finance'  && <FinanceScreen />}
             {current === 'services' && <ServicesScreen />}
-            {current === 'boutique' && <BoutiqueScreen />}
+            {current === 'ventes'   && <VentesScreen />}
+            {current === 'team'     && <TeamScreen />}
+            {current === 'clients'  && <ClientsScreen />}
+            {current === 'stock'    && <StockScreen />}
+            {current === 'settings' && <SettingsScreen />}
           </div>
         </div>
       </main>

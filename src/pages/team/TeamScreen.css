@@ -1,0 +1,186 @@
+/* Salon Haire — Section Collaborateurs */
+
+.tm-page-new { display: flex; flex-direction: column; gap: 0; }
+
+/* ─── Tabs ─── */
+.tm-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--line);
+  padding: 0 0 0 2px; margin-bottom: 22px;
+}
+.tm-tab {
+  background: none; border: 0; padding: 10px 18px 12px; font-size: 14px;
+  font-family: var(--sans); color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color .15s, border-color .15s; font-weight: 500;
+}
+.tm-tab:hover { color: var(--ink); }
+.tm-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* ─── Membres layout ─── */
+.tm-membres-layout {
+  display: grid; grid-template-columns: 430px 1fr; gap: 18px; align-items: start;
+}
+
+.tm-membres-card { overflow: hidden; }
+.tm-membres-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 22px 22px 16px;
+}
+.tm-membres-list { padding: 0 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+
+.tm-membre-row {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--radius-lg);
+  border: 1px solid transparent; background: var(--surface-inset);
+  color: var(--ink); cursor: pointer; text-align: left; transition: all .15s;
+}
+.tm-membre-row:hover  { border-color: var(--line); background: var(--surface); }
+.tm-membre-row.active { border-color: var(--champagne); background: var(--surface); box-shadow: 0 0 0 1px var(--champagne-soft); }
+
+.tm-membre-av {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  color: #fff; font-family: var(--serif); font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; letter-spacing: 0.02em;
+}
+.tm-membre-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tm-membre-nom  { font-size: 14px; font-weight: 600; color: var(--ink); }
+.tm-membre-role { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; font-weight: 500; }
+
+.tm-actif-badge {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px;
+  background: rgba(107,142,106,.12); color: #5a9659; letter-spacing: 0.04em; flex-shrink: 0;
+}
+
+/* ─── Horaires panel ─── */
+.tm-horaires-wrap { min-height: 300px; }
+.tm-horaires-panel { padding: 22px 24px; }
+
+.tm-hor-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding-bottom: 18px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
+}
+.tm-hor-title { font-family: var(--serif); font-size: 17px; font-weight: 500; font-style: italic; color: var(--ink); margin-bottom: 3px; }
+.tm-hor-sub   { font-size: 12px; color: var(--muted); }
+
+.tm-hor-days { display: flex; flex-direction: column; }
+.tm-hor-day {
+  display: flex; align-items: center; gap: 0;
+  padding: 13px 0; border-bottom: 1px solid var(--line);
+  min-height: 52px;
+}
+.tm-hor-day:last-child { border-bottom: 0; }
+.tm-hor-day.off { background: rgba(0,0,0,.015); }
+
+.tm-hor-check {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; min-width: 160px; flex-shrink: 0; user-select: none;
+}
+.tm-hor-check input[type=checkbox] {
+  width: 16px; height: 16px; border-radius: 3px; accent-color: var(--champagne-deep);
+  cursor: pointer; flex-shrink: 0;
+}
+.tm-hor-day-name {
+  font-size: 14px; font-weight: 500; color: var(--ink);
+}
+.tm-hor-day.off .tm-hor-day-name { color: var(--muted); }
+
+.tm-hor-times {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.tm-hor-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tm-hor-sep   { color: var(--muted); font-size: 14px; }
+
+.tm-time-inp {
+  border: 1px solid var(--line); background: var(--surface-inset);
+  border-radius: var(--radius); padding: 5px 8px; font-size: 13px;
+  color: var(--ink); font-family: var(--sans); outline: 0; width: 90px;
+  transition: border-color .15s; text-align: center;
+}
+.tm-time-inp:focus { border-color: var(--champagne); }
+
+.tm-dur-inp {
+  border: 1px solid var(--line); background: var(--surface-inset);
+  border-radius: var(--radius); padding: 5px 8px; font-size: 13px;
+  color: var(--ink); font-family: var(--sans); outline: 0; width: 56px;
+  text-align: center; transition: border-color .15s;
+}
+.tm-dur-inp:focus { border-color: var(--champagne); }
+
+.tm-hor-closed { font-size: 13px; color: var(--muted); font-style: italic; }
+
+/* ─── Congés tab ─── */
+.tm-conges-panel { }
+.tm-conges-card  { overflow: hidden; }
+.tm-conges-head  {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 22px 22px 16px;
+}
+.tm-conges-empty {
+  padding: 40px 22px; text-align: center; font-size: 13px; color: var(--muted); font-style: italic;
+}
+.tm-conges-list  { padding: 0 0 8px; }
+.tm-conges-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 22px; border-top: 1px solid var(--line); transition: background .12s;
+}
+.tm-conges-row:hover { background: var(--surface-inset); }
+.tm-conges-info { display: flex; flex-direction: column; gap: 3px; }
+.tm-conges-who   { font-size: 14px; font-weight: 600; color: var(--ink); }
+.tm-conges-type  { font-size: 12px; color: var(--champagne-deep); font-weight: 500; }
+.tm-conges-dates { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tm-conges-motif { font-size: 11.5px; color: var(--muted); font-style: italic; }
+
+.tm-approve {
+  background: rgba(107,142,106,.12); color: #5a9659; border: 0;
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 99px; cursor: pointer;
+  font-family: var(--sans); transition: background .15s;
+}
+.tm-approve:hover { background: rgba(107,142,106,.22); }
+.tm-decline {
+  background: rgba(184,80,80,.08); color: #c25e5e; border: 0;
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 99px; cursor: pointer;
+  font-family: var(--sans); transition: background .15s;
+}
+.tm-decline:hover { background: rgba(184,80,80,.16); }
+
+/* ─── Modal ─── */
+.tm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.32); backdrop-filter: blur(6px);
+  z-index: 400; display: flex; align-items: center; justify-content: center;
+}
+.tm-modal-card {
+  background: var(--surface); border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22); width: 520px; max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 40px); overflow-y: auto;
+}
+.tm-modal-title {
+  font-family: var(--serif); font-size: 22px; font-weight: 500; font-style: italic;
+  color: var(--ink); padding: 28px 28px 0;
+}
+.tm-form { padding: 18px 28px 8px; display: flex; flex-direction: column; gap: 15px; }
+.tm-form-label {
+  display: flex; flex-direction: column; gap: 7px;
+  font-size: 11px; color: var(--muted); letter-spacing: 0.12em; font-weight: 600; text-transform: uppercase;
+}
+.tm-form input:not([type=checkbox]):not([type=color]),
+.tm-form select,
+.tm-form textarea {
+  border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius-lg);
+  padding: 12px 16px; font-size: 14px; color: var(--ink); font-family: var(--sans); outline: 0;
+  transition: border-color .15s; width: 100%; box-sizing: border-box;
+}
+.tm-form input:focus, .tm-form select:focus, .tm-form textarea:focus { border-color: var(--champagne); }
+.tm-form textarea { resize: vertical; }
+.tm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tm-color-input {
+  height: 44px; padding: 4px 8px !important; cursor: pointer; border-radius: var(--radius-lg) !important;
+}
+.tm-modal-foot {
+  display: flex; align-items: center; justify-content: flex-end; gap: 18px;
+  padding: 16px 28px 24px;
+}
+.tm-cancel {
+  background: none; border: 0; font-size: 14px; color: var(--muted); cursor: pointer;
+  font-family: var(--sans);
+}
+.tm-cancel:hover { color: var(--ink); }

@@ -1,7 +1,7 @@
 // Client REST pour la section Équipe (Team). Tous les appels sont défensifs :
 // en l'absence de backend joignable, l'UI retombe sur les données SEED locales.
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const BASE = `${API_URL}/api/team`
 
 function authHeaders() {

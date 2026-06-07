@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import SIcon from '../components/SIcon'
 import { connectSocket } from '../services/socket'
 
-const API = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api'
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'
 
 export default function SignIn() {
   const [tab, setTab] = useState('signin')

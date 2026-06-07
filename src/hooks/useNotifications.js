@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { socket } from '../services/socket';
 
-const API = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api';
 
 function authHeaders() {
   const token = localStorage.getItem('haire_token');

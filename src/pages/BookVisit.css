@@ -1,0 +1,109 @@
+/* ─── BookVisit responsive layout ─── */
+
+.bv-root { background: var(--bg); min-height: 100vh; }
+
+/* Step bar */
+.bv-stepbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0 56px;
+}
+.bv-stepbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Body grid */
+.bv-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 48px;
+  padding: 56px 56px 100px;
+  align-items: start;
+}
+
+/* Sidebar sticky wrapper */
+.bv-sidebar-sticky { position: sticky; top: 96px; }
+
+/* ─── Mobile (≤768px) ─── */
+@media (max-width: 768px) {
+  .bv-stepbar { padding: 0 16px; }
+
+  .bv-stepbar-inner { gap: 0; }
+
+  /* Hide step labels, keep number circles */
+  .bv-step-label { display: none; }
+
+  .bv-body {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 24px 16px 60px;
+  }
+
+  /* Sidebar moves below content, no longer sticky */
+  .bv-sidebar-sticky { position: static; order: -1; }
+
+  /* Confirmation screen padding */
+  .bv-confirm-pad { padding: 40px 20px; }
+  .bv-confirm-ref-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .bv-confirm-ref-divider { display: none; }
+  .bv-confirm-actions { flex-direction: column; align-items: stretch; }
+
+  /* Step 4 confirm card */
+  .bv-confirm-card-meta {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+  }
+
+  /* Step 4 contact form */
+  .bv-contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Time picker: 4 cols instead of 5 */
+  .bv-time-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Date tabs: make them a bit smaller */
+  .bv-date-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  /* Stylist card: collapse columns */
+  .bv-stylist-card {
+    grid-template-columns: 56px 1fr !important;
+    gap: 14px !important;
+  }
+  .bv-stylist-check { display: none; }
+
+  /* Service card */
+  .bv-svc-card {
+    padding: 14px 16px !important;
+  }
+
+  /* Back/Continue row */
+  .bv-nav-row { margin-top: 24px !important; padding-top: 20px !important; }
+}
+
+/* ─── Small phone (≤480px) ─── */
+@media (max-width: 480px) {
+  .bv-stepbar { padding: 0 8px; }
+  .bv-body { padding: 16px 12px 48px; }
+
+  .bv-time-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .bv-confirm-card-meta {
+    grid-template-columns: 1fr !important;
+  }
+}

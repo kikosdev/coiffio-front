@@ -1,0 +1,187 @@
+/* ─── MyAccount layout ─── */
+
+.ma-root { background: var(--bg); min-height: 100vh; padding-top: 76px; }
+
+/* Outer grid: sidebar + content */
+.ma-layout {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 48px;
+  padding: 48px 56px 100px;
+  align-items: start;
+}
+
+/* Sidebar sticky */
+.ma-sidebar { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Mobile tab bar (hidden on desktop) */
+.ma-mobile-tabs {
+  display: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.ma-mobile-tabs::-webkit-scrollbar { display: none; }
+.ma-mobile-tab {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 99px;
+  border: 1px solid var(--line);
+  background: transparent; cursor: pointer;
+  font-size: 12.5px; font-weight: 500; color: var(--muted);
+  font-family: var(--sans); white-space: nowrap;
+  transition: all .15s;
+}
+.ma-mobile-tab.active {
+  background: var(--ink); color: var(--surface); border-color: var(--ink);
+}
+
+/* Next visit card */
+.ma-next-card {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+
+/* Quick actions row */
+.ma-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Upcoming appointment card */
+.ma-appt-card {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 24px;
+  align-items: stretch;
+}
+.ma-appt-right { min-width: 150px; }
+
+/* History table rows */
+.ma-history-head,
+.ma-history-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 150px 90px 90px 44px;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Payments: card + stats */
+.ma-payments-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+
+/* Loyalty perks */
+.ma-perks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* Profile forms */
+.ma-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ma-profile-pw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Section title */
+.ma-section-h1 {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin: 0 0 8px;
+}
+
+/* ─── Tablet (≤1024px) ─── */
+@media (max-width: 1024px) {
+  .ma-layout { gap: 32px; padding: 36px 32px 80px; }
+  .ma-history-head,
+  .ma-history-row {
+    grid-template-columns: 60px 1fr 110px 80px 80px 40px;
+    gap: 12px;
+  }
+  .ma-perks-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── Mobile (≤768px) ─── */
+@media (max-width: 768px) {
+
+  /* Switch to single-column; sidebar hidden, mobile tabs shown */
+  .ma-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0 0 60px;
+  }
+  .ma-sidebar { display: none; }
+  .ma-mobile-tabs { display: flex; }
+
+  /* Tighter nav on mobile */
+  .ma-root { padding-top: 60px; }
+
+  /* Content area gets side padding */
+  .ma-content { padding: 20px 16px 0; }
+
+  /* Section heading */
+  .ma-section-h1 { font-size: 34px; }
+
+  /* Next visit card: stack date | info, hide right column inline */
+  .ma-next-card {
+    grid-template-columns: 72px 1fr;
+    gap: 16px;
+  }
+  .ma-next-right { display: none; }
+
+  /* Quick actions: 3 col still fine but shrink padding handled by content area */
+  .ma-quick-grid { gap: 8px; }
+
+  /* Appointment card: stack to 2-col, hide right */
+  .ma-appt-card {
+    grid-template-columns: 64px 1fr;
+    gap: 16px;
+  }
+  .ma-appt-right { display: none; }
+
+  /* History: simplified — hide stylist + download columns */
+  .ma-history-head,
+  .ma-history-row {
+    grid-template-columns: 52px 1fr 70px 80px;
+    gap: 10px;
+  }
+  .ma-history-stylist,
+  .ma-history-dl { display: none; }
+
+  /* Payments top: stack */
+  .ma-payments-top { grid-template-columns: 1fr; }
+
+  /* Perks: 2 col */
+  .ma-perks-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Profile forms: 1 col */
+  .ma-profile-grid,
+  .ma-profile-pw-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Small phone (≤480px) ─── */
+@media (max-width: 480px) {
+  .ma-quick-grid { grid-template-columns: repeat(3, 1fr); }
+  .ma-section-h1 { font-size: 28px; }
+  .ma-perks-grid { grid-template-columns: 1fr 1fr; }
+}

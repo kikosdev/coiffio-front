@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import SIcon from '../components/SIcon'
+import './MyAccount.css'
 
 const NAV_ITEMS = [
   { key: 'overview',  icon: 'layout-dashboard', label: 'Overview' },
@@ -22,24 +23,34 @@ export default function MyAccount() {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      <TopNav signedIn />
-      <div style={{
-        maxWidth: 1320, margin: '0 auto',
-        display: 'grid', gridTemplateColumns: '280px 1fr',
-        gap: 48, padding: '48px 56px 100px', alignItems: 'start',
-      }}>
+    <div className="ma-root">
+      <TopNav signedIn={true} role="client" />
+
+      {/* Mobile tab bar — visible only on ≤768px */}
+      <nav className="ma-mobile-tabs">
+        {NAV_ITEMS.map(item => (
+          <button key={item.key} className={`ma-mobile-tab${tab === item.key ? ' active' : ''}`} onClick={() => changeTab(item.key)}>
+            <SIcon name={item.icon} size={14} />
+            {item.label}
+            {item.badge && <span style={{ background: 'var(--champagne)', color: '#1c1612', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 99 }}>{item.badge}</span>}
+          </button>
+        ))}
+      </nav>
+
+      <div className="ma-layout">
         {/* ── Sidebar ── */}
         <Sidebar tab={tab} changeTab={changeTab} />
 
         {/* ── Main content ── */}
-        <div key={animKey} className="fade-up">
-          {tab === 'overview'  && <OverviewTab  changeTab={changeTab} />}
-          {tab === 'upcoming'  && <UpcomingTab />}
-          {tab === 'history'   && <HistoryTab />}
-          {tab === 'payments'  && <PaymentsTab />}
-          {tab === 'loyalty'   && <LoyaltyTab />}
-          {tab === 'profile'   && <ProfileTab />}
+        <div className="ma-content" key={animKey} style={{ minWidth: 0 }}>
+          <div className="fade-up">
+            {tab === 'overview'  && <OverviewTab  changeTab={changeTab} />}
+            {tab === 'upcoming'  && <UpcomingTab />}
+            {tab === 'history'   && <HistoryTab />}
+            {tab === 'payments'  && <PaymentsTab />}
+            {tab === 'loyalty'   && <LoyaltyTab />}
+            {tab === 'profile'   && <ProfileTab />}
+          </div>
         </div>
       </div>
     </div>
@@ -49,7 +60,7 @@ export default function MyAccount() {
 /* ── Sidebar ── */
 function Sidebar({ tab, changeTab }) {
   return (
-    <div style={{ position: 'sticky', top: 96, display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="ma-sidebar">
       {/* Member ID card */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-soft)' }}>
         <div className="ph-3" style={{ height: 88, position: 'relative' }}>
@@ -124,7 +135,7 @@ function Sidebar({ tab, changeTab }) {
 function SectionTitle({ title, sub }) {
   return (
     <div style={{ marginBottom: 32 }}>
-      <h1 style={{ fontFamily: 'var(--serif)', fontSize: 48, fontWeight: 500, letterSpacing: '-0.025em', lineHeight: 1, margin: '0 0 8px' }} dangerouslySetInnerHTML={{ __html: title }} />
+      <h1 className="ma-section-h1" dangerouslySetInnerHTML={{ __html: title }} />
       {sub && <div style={{ color: 'var(--muted)', fontSize: 13.5 }}>{sub}</div>}
     </div>
   )
@@ -193,10 +204,9 @@ function OverviewTab({ changeTab }) {
       <SectionTitle title='My <em style="font-style:italic;font-weight:400;color:var(--champagne-deep)">overview</em>.' sub="Welcome back, Éloïse." />
 
       {/* Next visit card */}
-      <div style={{
+      <div className="ma-next-card" style={{
         background: 'var(--ink)', color: 'var(--surface)',
         borderRadius: 'var(--radius-lg)', padding: '24px 28px', marginBottom: 16,
-        display: 'grid', gridTemplateColumns: '92px 1fr auto', gap: 24, alignItems: 'center',
         position: 'relative', boxShadow: 'var(--shadow-deep)',
       }}>
         <div style={{ position: 'absolute', top: 14, right: 18, background: 'var(--champagne)', color: '#1c1612', padding: '4px 12px', borderRadius: 99, fontSize: 9.5, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600 }}>Next</div>
@@ -213,7 +223,7 @@ function OverviewTab({ changeTab }) {
             with Léa Dubois
           </div>
         </div>
-        <div style={{ textAlign: 'right', borderLeft: '1px solid rgba(243,236,224,.14)', paddingLeft: 24, paddingTop: 20 }}>
+        <div className="ma-next-right" style={{ textAlign: 'right', borderLeft: '1px solid rgba(243,236,224,.14)', paddingLeft: 24, paddingTop: 20 }}>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 32, fontWeight: 500, color: 'var(--champagne)' }}>14:00</div>
           <div style={{ fontSize: 11, color: 'rgba(243,236,224,.5)', marginTop: 4 }}>2h 45m total</div>
           <button onClick={() => changeTab('upcoming')} style={{ marginTop: 16, border: '1px solid rgba(243,236,224,.18)', background: 'transparent', color: 'rgba(243,236,224,.75)', padding: '7px 14px', borderRadius: 'var(--radius)', fontSize: 11.5, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -223,7 +233,7 @@ function OverviewTab({ changeTab }) {
       </div>
 
       {/* Quick actions row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+      <div className="ma-quick-grid" style={{ marginBottom: 16 }}>
         {[
           { icon: 'calendar-plus', label: 'Book a visit', action: () => {} },
           { icon: 'clock',         label: 'Visit history', action: () => changeTab('history') },
@@ -275,8 +285,7 @@ function UpcomingTab() {
       <SectionTitle title='Upcoming <em style="font-style:italic;font-weight:400;color:var(--champagne-deep)">visits</em>.' sub="2 appointments scheduled." />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
         {appts.map((a, i) => (
-          <div key={i} style={{
-            display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: 24, alignItems: 'stretch',
+          <div key={i} className="ma-appt-card" style={{
             background: a.next ? 'var(--ink)' : 'var(--surface)',
             border: `1px solid ${a.next ? 'transparent' : 'var(--line)'}`,
             borderRadius: 'var(--radius-lg)', padding: '22px 24px',
@@ -298,7 +307,7 @@ function UpcomingTab() {
               </div>
               <div style={{ fontSize: 10.5, color: a.next ? 'rgba(243,236,224,.4)' : 'var(--muted-2)', marginTop: 10, fontFamily: 'var(--mono)', letterSpacing: '0.04em' }}>Ref: {a.ref}</div>
             </div>
-            <div style={{ borderLeft: `1px solid ${a.next ? 'rgba(243,236,224,.14)' : 'var(--line)'}`, paddingLeft: 24, paddingTop: a.next ? 18 : 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: 150 }}>
+            <div className="ma-appt-right" style={{ borderLeft: `1px solid ${a.next ? 'rgba(243,236,224,.14)' : 'var(--line)'}`, paddingLeft: 24, paddingTop: a.next ? 18 : 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: 150 }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 28, fontWeight: 500, color: a.next ? 'var(--champagne)' : 'var(--champagne-deep)' }}>{a.time}</div>
                 <div style={{ fontSize: 11, color: a.next ? 'rgba(243,236,224,.5)' : 'var(--muted)', marginTop: 2 }}>{a.dur}</div>
@@ -344,24 +353,24 @@ function HistoryTab() {
     <div>
       <SectionTitle title='Visit <em style="font-style:italic;font-weight:400;color:var(--champagne-deep)">history</em>.' sub={`${rows.length} past visits`} />
       <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-soft)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 150px 90px 90px 44px', gap: 16, alignItems: 'center', padding: '12px 24px', background: 'var(--surface-2)', fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 600 }}>
-          <span>Date</span><span>Service</span><span>Stylist</span><span style={{ textAlign: 'right' }}>Amount</span><span>Status</span><span />
+        <div className="ma-history-head" style={{ padding: '12px 24px', background: 'var(--surface-2)', fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 600 }}>
+          <span>Date</span><span>Service</span><span className="ma-history-stylist">Stylist</span><span style={{ textAlign: 'right' }}>Amount</span><span>Status</span><span className="ma-history-dl" />
         </div>
         {rows.map((r, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 150px 90px 90px 44px', gap: 16, alignItems: 'center', padding: '16px 24px', borderBottom: i < rows.length - 1 ? '1px solid var(--line)' : 0 }}>
+          <div key={i} className="ma-history-row" style={{ padding: '16px 24px', borderBottom: i < rows.length - 1 ? '1px solid var(--line)' : 0 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 500, lineHeight: 1 }}>{r.day}</div>
               <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginTop: 2 }}>{r.mon}</div>
             </div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: 15, fontWeight: 500 }}>{r.svc}</div>
-            <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{r.stylist}</div>
+            <div className="ma-history-stylist" style={{ fontSize: 12.5, color: 'var(--muted)' }}>{r.stylist}</div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: 16, fontWeight: 500, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>€{r.amt}</div>
             <div>
               <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: statusStyle[r.status]?.bg || 'var(--surface-inset)', color: statusStyle[r.status]?.color || 'var(--muted)' }}>
                 {r.status}
               </span>
             </div>
-            <button style={{ border: '1px solid var(--line)', background: 'transparent', borderRadius: 'var(--radius-sm)', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--muted)' }}
+            <button className="ma-history-dl" style={{ border: '1px solid var(--line)', background: 'transparent', borderRadius: 'var(--radius-sm)', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--muted)' }}
               title="Download receipt"
             >
               <SIcon name="download" size={13} />
@@ -386,7 +395,7 @@ function PaymentsTab() {
       <SectionTitle title='<em style="font-style:italic;font-weight:400;color:var(--champagne-deep)">Payments</em> &amp; cards.' />
 
       {/* Card + YTD stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16, marginBottom: 24 }}>
+      <div className="ma-payments-top" style={{ marginBottom: 24 }}>
         {/* Credit card visual */}
         <div style={{ background: 'linear-gradient(135deg, #d4b481 0%, #b89968 55%, #8a6d4a 100%)', color: '#1c1612', borderRadius: 'var(--radius-lg)', padding: '26px 28px', position: 'relative', overflow: 'hidden', minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: 'var(--shadow-deep)' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 0%, rgba(255,255,255,.18), transparent 50%)' }} />
@@ -478,7 +487,7 @@ function LoyaltyTab() {
       </div>
 
       {/* Perks grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+      <div className="ma-perks-grid" style={{ marginBottom: 16 }}>
         {perks.map(p => (
           <div key={p.label} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', padding: '18px 16px', textAlign: 'center', boxShadow: 'var(--shadow-soft)' }}>
             <div style={{ width: 40, height: 40, borderRadius: 'var(--radius)', background: 'var(--champagne-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--champagne-deep)', margin: '0 auto 10px' }}>
@@ -529,7 +538,7 @@ function ProfileTab() {
           <h4 style={{ margin: 0, fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 500 }}>Personal <em style={{ fontStyle: 'italic', color: 'var(--champagne-deep)' }}>details</em></h4>
           {saved && <span style={{ fontSize: 12, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 6 }}><SIcon name="check" size={13} /> Saved</span>}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="ma-profile-grid">
           <Field label="First name"    value="Éloïse" />
           <Field label="Last name"     value="Martin" />
           <Field label="Email"         value="eloise@example.com" type="email" />
@@ -573,7 +582,7 @@ function ProfileTab() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Field label="Current password" type="password" value="••••••••" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="ma-profile-pw-grid">
             <Field label="New password"     type="password" value="" />
             <Field label="Confirm password" type="password" value="" />
           </div>

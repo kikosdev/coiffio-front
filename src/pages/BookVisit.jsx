@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import SIcon from '../components/SIcon'
 import TopNav from '../components/TopNav'
+import './BookVisit.css'
 
 /* ─── Data ─── */
 const SERVICES = [
@@ -86,12 +87,12 @@ export default function BookVisit() {
   const date    = DATES[selectedDate]
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      <TopNav />
+    <div className="bv-root">
+      <TopNav signedIn={!!localStorage.getItem('haire_token')} role={localStorage.getItem('haire_role')} />
 
       {/* ── Step bar ── */}
-      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)', padding: '0 56px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'stretch' }}>
+      <div className="bv-stepbar">
+        <div className="bv-stepbar-inner">
           {STEPS.map((label, i) => {
             const num      = i + 1
             const isCurr   = step === num
@@ -113,7 +114,7 @@ export default function BookVisit() {
                 }}>
                   {isDone ? <SIcon name="check" size={11} /> : <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 13 }}>{num}</span>}
                 </div>
-                <span style={{
+                <span className="bv-step-label" style={{
                   fontSize: 11.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600,
                   color: isCurr ? 'var(--ink)' : isDone ? 'var(--champagne-deep)' : 'var(--muted)',
                   transition: 'color .2s',
@@ -125,7 +126,7 @@ export default function BookVisit() {
       </div>
 
       {/* ── Body ── */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 48, padding: '56px 56px 100px', alignItems: 'start' }}>
+      <div className="bv-body">
 
         {/* Main content */}
         <div ref={mainRef} key={animKey} className="fade-up">
@@ -158,7 +159,7 @@ export default function BookVisit() {
 
           {/* Back / Continue row (under content) */}
           {step < 4 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 36, paddingTop: 28, borderTop: '1px solid var(--line)' }}>
+            <div className="bv-nav-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 36, paddingTop: 28, borderTop: '1px solid var(--line)' }}>
               <button onClick={back} style={{
                 border: '1px solid var(--line)', background: 'transparent', color: step === 1 ? 'var(--muted-2)' : 'var(--ink-soft)',
                 padding: '11px 20px', borderRadius: 'var(--radius)', fontSize: 13, cursor: step === 1 ? 'not-allowed' : 'pointer',
@@ -198,7 +199,7 @@ function Sidebar({ services, stylist, date, slot, totalDur, totalPrice, step, ca
   const durStr = durH > 0 ? `${durH}h${durM > 0 ? ` ${durM}m` : ''}` : `${durM}m`
 
   return (
-    <div style={{ position: 'sticky', top: 96 }}>
+    <div className="bv-sidebar-sticky">
       <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
 
         {/* Header */}
@@ -351,6 +352,7 @@ function StepServices({ services, selected, toggle, filter, setFilter }) {
               const isSel = selected.includes(svc.id)
               return (
                 <div key={svc.id} onClick={() => toggle(svc.id)}
+                  className="bv-svc-card"
                   style={{
                     display: 'grid', gridTemplateColumns: '1fr auto',
                     alignItems: 'center', gap: 20,
@@ -418,6 +420,7 @@ function StepStylist({ stylists, qualified, selected, onSelect }) {
           return (
             <div key={s.id}
               onClick={() => isQual && onSelect(s.id)}
+              className="bv-stylist-card"
               style={{
                 display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: 20, alignItems: 'center',
                 padding: '20px 24px',
@@ -453,7 +456,7 @@ function StepStylist({ stylists, qualified, selected, onSelect }) {
               </div>
 
               {/* Check */}
-              <div style={{
+              <div className="bv-stylist-check" style={{
                 width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: isSel ? 'var(--champagne)' : 'transparent',
                 border: `2px solid ${isSel ? 'var(--champagne)' : 'var(--line-strong)'}`,
@@ -496,7 +499,7 @@ function StepTime({ dates, selectedDateIdx, setDateIdx, slots, selected, onSelec
       <div style={{ fontSize: 10.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--champagne-deep)', fontWeight: 600, marginBottom: 12 }}>June 2026</div>
 
       {/* Date tabs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 36 }}>
+      <div className="bv-date-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 36 }}>
         {dates.map((d, i) => {
           const isSel    = selectedDateIdx === i
           const isClosed = d.closed
@@ -527,7 +530,7 @@ function StepTime({ dates, selectedDateIdx, setDateIdx, slots, selected, onSelec
             <SIcon name={g.icon} size={13} style={{ color: 'var(--champagne-deep)' }} />
             <span style={{ fontSize: 10.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 600 }}>{g.label}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+          <div className="bv-time-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
             {g.times.map(slot => {
               const isSel = selected === slot
               return (
@@ -587,7 +590,7 @@ function StepConfirm({ services, stylist, date, slot, total, onConfirm }) {
         </div>
 
         {/* Stylist + Date/Time row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, marginTop: 22 }}>
+        <div className="bv-confirm-card-meta" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, marginTop: 22 }}>
           <div>
             <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(243,236,224,.45)', marginBottom: 6 }}>Stylist</div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>{stylist?.name}</div>
@@ -615,7 +618,7 @@ function StepConfirm({ services, stylist, date, slot, total, onConfirm }) {
       {/* Contact form */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', padding: '26px 28px', marginBottom: 20, boxShadow: 'var(--shadow-soft)' }}>
         <h4 style={{ margin: '0 0 18px', fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 500 }}>Your <em style={{ fontStyle: 'italic', color: 'var(--champagne-deep)' }}>contact details</em></h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="bv-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
           <Field label="First name"       placeholder="Éloïse" />
           <Field label="Last name"        placeholder="Martin" />
           <Field label="Email"            placeholder="eloise@example.com" type="email" />
@@ -653,7 +656,7 @@ function ConfirmScreen({ refCode, totalPrice }) {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       <TopNav />
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 48px' }}>
+      <div className="bv-confirm-pad" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 48px' }}>
         <div style={{ maxWidth: 540, width: '100%', textAlign: 'center' }}>
           {/* Check circle */}
           <div style={{ width: 76, height: 76, borderRadius: '50%', background: 'var(--champagne)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px', boxShadow: '0 8px 32px rgba(184,153,104,.35)' }}>
@@ -669,12 +672,12 @@ function ConfirmScreen({ refCode, totalPrice }) {
 
           {/* Reference card */}
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-xl)', padding: '28px 32px', marginBottom: 36, boxShadow: 'var(--shadow-card)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', gap: 24, alignItems: 'center' }}>
+            <div className="bv-confirm-ref-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', gap: 24, alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 500, marginBottom: 8 }}>Booking reference</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 20, color: 'var(--ink)', letterSpacing: '0.12em' }}>{refCode}</div>
               </div>
-              <div style={{ background: 'var(--line)', height: '100%' }} />
+              <div className="bv-confirm-ref-divider" style={{ background: 'var(--line)', height: '100%' }} />
               <div>
                 <div style={{ fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 500, marginBottom: 8 }}>Total due</div>
                 <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 26, fontWeight: 500, color: 'var(--champagne-deep)' }}>€{totalPrice}</div>
@@ -684,7 +687,7 @@ function ConfirmScreen({ refCode, totalPrice }) {
           </div>
 
           {/* Actions */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="bv-confirm-actions" style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <Link to="/account" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: 'var(--ink)', color: 'var(--surface)', textDecoration: 'none',

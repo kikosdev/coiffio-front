@@ -4,7 +4,12 @@ import { createPortal } from 'react-dom'
 import SIcon from './SIcon'
 import styles from './TopNav.module.css'
 
-export default function TopNav({ signedIn }) {
+const STAFF_ROLES = ['owner', 'supervisor', 'staff']
+
+export default function TopNav({ signedIn, role }) {
+  const isStaff = signedIn && STAFF_ROLES.includes(role)
+  const authHref  = !signedIn ? '/signin'   : isStaff ? '/dashboard' : '/account'
+  const authLabel = !signedIn ? 'Sign in'   : isStaff ? 'Dashboard'  : 'My Account'
   const navigate = useNavigate()
   const [open,     setOpen]     = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -55,15 +60,9 @@ export default function TopNav({ signedIn }) {
           <a href="#" onClick={close}>The Journal</a>
         </div>
         <div className={styles.drawerFoot}>
-          {signedIn ? (
-            <Link to="/account" className={styles.drawerSecondary} onClick={close}>
-              <SIcon name="user-round" size={15} /><span>My account</span>
-            </Link>
-          ) : (
-            <Link to="/signin" className={styles.drawerSecondary} onClick={close}>
-              <SIcon name="user-round" size={15} /><span>Sign in</span>
-            </Link>
-          )}
+          <Link to={authHref} className={styles.drawerSecondary} onClick={close}>
+            <SIcon name="user-round" size={15} /><span>{authLabel}</span>
+          </Link>
           <Link to="/book" className={styles.book} onClick={close} style={{ justifyContent: 'center', padding: '15px 22px', fontSize: 14 }}>
             Book a visit
             <SIcon name="arrow-right" size={13} />
@@ -99,17 +98,10 @@ export default function TopNav({ signedIn }) {
 
         <div className={styles.right}>
           <span className={styles.locale}>EN · €</span>
-          {signedIn ? (
-            <Link to="/account" className={styles.signin}>
-              <SIcon name="user-round" size={14} />
-              <span>My Account</span>
-            </Link>
-          ) : (
-            <Link to="/signin" className={styles.signin}>
-              <SIcon name="user-round" size={14} />
-              <span>Sign in</span>
-            </Link>
-          )}
+          <Link to={authHref} className={styles.signin}>
+            <SIcon name="user-round" size={14} />
+            <span>{authLabel}</span>
+          </Link>
           <Link to="/book" className={styles.book}>
             Book a visit
             <SIcon name="arrow-right" size={13} />

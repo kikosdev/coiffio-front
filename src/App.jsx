@@ -4,6 +4,12 @@ import SignIn from './pages/SignIn'
 import MyAccount from './pages/MyAccount'
 import BookVisit from './pages/BookVisit'
 import SalonDashboard from './pages/SalonDashboard'
+import ShopHomePage from './pages/shop/ShopHomePage'
+import ProductDetailPage from './pages/shop/ProductDetailPage'
+import CartPage from './pages/shop/CartPage'
+import CheckoutPage from './pages/shop/CheckoutPage'
+import OrderConfirmationPage from './pages/shop/OrderConfirmationPage'
+import OrderTrackingPage from './pages/shop/OrderTrackingPage'
 
 function OwnerRoute({ children }) {
   const role = localStorage.getItem('haire_role')
@@ -26,6 +32,14 @@ export default function App() {
       <Route path="/account" element={<MyAccount />} />
       <Route path="/book" element={<BookVisit />} />
       <Route path="/dashboard/*" element={<OwnerRoute><SalonDashboard /></OwnerRoute>} />
+
+      {/* E-commerce public shop */}
+      <Route path="/shop" element={<ShopHomePage />} />
+      <Route path="/shop/product/:id" element={<ProductDetailPage />} />
+      <Route path="/shop/cart" element={<CartPage />} />
+      <Route path="/shop/checkout" element={<CheckoutPage />} />
+      <Route path="/shop/order/:orderNumber" element={<OrderConfirmationPage />} />
+      <Route path="/shop/track" element={<OrderTrackingPage />} />
     </Routes>
   )
 }

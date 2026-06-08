@@ -405,7 +405,7 @@ export default function Landing() {
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh', paddingTop: 76 }}>
-      <TopNav />
+      <TopNav signedIn={!!localStorage.getItem('haire_token')} role={localStorage.getItem('haire_role')} />
       <HeroSection />
       <PathsSection />
       <ServicesSection />

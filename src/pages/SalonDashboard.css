@@ -157,6 +157,8 @@
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
+.sh-go-home { color: var(--muted); }
+.sh-go-home:hover { color: var(--champagne-deep); background: var(--champagne-soft); }
 .sh-deconnexion { color: var(--muted); }
 .sh-deconnexion:hover { color: #c25e5e; background: rgba(184,80,80,.06); }
 
@@ -1283,74 +1285,11 @@
   border-top: 1px solid var(--line);
   margin-top: 8px;
 }
+.sh-mob-home { color: var(--muted); }
+.sh-mob-home:hover { color: var(--champagne-deep); background: var(--champagne-soft); }
 .sh-mob-logout { color: var(--muted); }
 .sh-mob-logout:hover { background: rgba(168, 74, 58, .08); color: var(--danger); }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE BOTTOM TAB BAR
-═══════════════════════════════════════════════════════════ */
-
-.sh-mobile-nav {
-  display: none;
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 64px;
-  background: rgba(var(--bg-2-raw, 250, 246, 238), 0.92);
-  background: var(--bg-2);
-  border-top: 1px solid var(--line);
-  flex-direction: row;
-  align-items: stretch;
-  z-index: 100;
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.sh-mn-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  background: transparent;
-  border: 0;
-  color: var(--muted);
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  transition: color .15s ease;
-  -webkit-tap-highlight-color: transparent;
-  padding: 0 4px;
-}
-.sh-mn-item.active { color: var(--champagne-deep); }
-.sh-mn-item.active .sh-mn-ic { transform: translateY(-1px); }
-
-.sh-mn-ic {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform .15s ease;
-}
-
-.sh-mn-label { font-size: 9.5px; line-height: 1; }
-
-.sh-mn-badge {
-  position: absolute;
-  top: -4px; right: -7px;
-  background: var(--champagne-deep);
-  color: #fff;
-  font-size: 8.5px;
-  font-weight: 700;
-  padding: 1px 4px;
-  border-radius: 99px;
-  min-width: 14px;
-  text-align: center;
-  line-height: 1.4;
-}
 
 /* ─── Mobile client detail bottom-sheet ─── */
 .sh-cl-mob-modal {
@@ -1479,10 +1418,6 @@
 @media (max-width: 768px) {
   .sh-app { grid-template-columns: 1fr; }
   .sh-sb { display: none; }
-  .sh-mobile-nav { display: flex; }
-
-  /* Push scroll content up so it's not hidden behind bottom nav */
-  .sh-scroll { padding-bottom: 64px; }
 
   .sh-page { padding: 18px 16px 24px; }
 

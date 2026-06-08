@@ -11,6 +11,7 @@ import StockScreen from './stock/StockScreen'
 import VentesScreen from './ventes/VentesScreen'
 import SettingsScreen from './settings/SettingsScreen'
 import ServicesScreen from './services/ServicesScreen'
+import OrdersScreen from './orders/OrdersScreen'
 
 /* ═══════════════════════════════════════════════════════════
    SHARED DATA
@@ -1743,33 +1744,6 @@ function ClientsScreen() {
    APP SHELL
 ═══════════════════════════════════════════════════════════ */
 
-/* Mobile bottom nav — 5 primary tabs shown at ≤768px */
-const MOBILE_NAV_ITEMS = [
-  { id: 'accueil',  label: 'Accueil',  icon: 'house' },
-  { id: 'schedule', label: 'Agenda',   icon: 'calendar-check' },
-  { id: 'services', label: 'Services', icon: 'scissors' },
-  { id: 'finance',  label: 'Finance',  icon: 'credit-card' },
-  { id: 'team',     label: 'Équipe',   icon: 'user-cog' },
-]
-
-function MobileNav({ current, setCurrent }) {
-  return (
-    <nav className="sh-mobile-nav">
-      {MOBILE_NAV_ITEMS.map(n => (
-        <button
-          key={n.id}
-          className={'sh-mn-item' + (current === n.id ? ' active' : '')}
-          onClick={() => setCurrent(n.id)}
-        >
-          <span className="sh-mn-ic">
-            <SIcon name={n.icon} size={20} />
-          </span>
-          <span className="sh-mn-label">{n.label}</span>
-        </button>
-      ))}
-    </nav>
-  )
-}
 
 const NAV_ITEMS = [
   { id:'accueil',  label:'Accueil',       icon:'house' },
@@ -1780,6 +1754,7 @@ const NAV_ITEMS = [
   { id:'finance',  label:'Finance & POS', icon:'credit-card' },
   { id:'stock',    label:'Stock',         icon:'package' },
   { id:'ventes',   label:'Ventes',        icon:'shopping-bag' },
+  { id:'orders',   label:'Commandes',     icon:'shopping-cart' },
   { id:'settings', label:'Paramètres',    icon:'settings' },
 ]
 
@@ -1792,6 +1767,7 @@ const TOPBAR_META = {
   team:     { crumb:'People / Équipe',        title:<><em>Collaborateurs</em></>,  sub:'Horaires · congés · équipe' },
   clients:  { crumb:'Gestion / Clients',     title:<>Clients <em>CRM</em></>,     sub:'Fiches · historique · fidélité' },
   stock:    { crumb:'Gestion / Inventaire', title:<>Stocks <em>&amp; Produits</em></>, sub:'Inventaire · fournisseurs · marges' },
+  orders:   { crumb:'E-commerce / Commandes', title:<>Gestion des <em>commandes</em></>, sub:'Commandes en ligne · statuts · paiements' },
   settings: { crumb:'Salon / Configuration', title:<><em>Configuration</em></>,       sub:'Établissement · taxes · horaires' },
 }
 
@@ -1857,8 +1833,12 @@ export default function SalonDashboard() {
           ))}
         </div>
 
-        {/* Déconnexion */}
+        {/* Déconnexion + Accueil */}
         <div className="sh-bottom">
+          <button className="sh-item sh-go-home" onClick={() => navigate('/')} title={collapsed ? 'Page d\'accueil' : ''}>
+            <span className="sh-icon"><SIcon name="house" size={17}/></span>
+            <span className="sh-label">Page d&apos;accueil</span>
+          </button>
           <button className="sh-item sh-deconnexion" onClick={logout} title={collapsed ? 'Déconnexion' : ''}>
             <span className="sh-icon"><SIcon name="log-out" size={17}/></span>
             <span className="sh-label">Déconnexion</span>
@@ -1903,13 +1883,11 @@ export default function SalonDashboard() {
             {current === 'team'     && <TeamScreen />}
             {current === 'clients'  && <ClientsScreen />}
             {current === 'stock'    && <StockScreen />}
+            {current === 'orders'   && <OrdersScreen />}
             {current === 'settings' && <SettingsScreen />}
           </div>
         </div>
       </main>
-
-      {/* Mobile bottom tab bar — hidden on desktop, shown at ≤768px */}
-      <MobileNav current={current} setCurrent={setCurrent} />
 
       {/* Mobile sidebar drawer — portalled to body to escape any stacking context */}
       {createPortal(
@@ -1947,8 +1925,12 @@ export default function SalonDashboard() {
               ))}
             </nav>
 
-            {/* Logout */}
+            {/* Home + Logout */}
             <div className="sh-mob-foot">
+              <button className="sh-mob-item sh-mob-home" onClick={() => { setMobileMenu(false); navigate('/') }}>
+                <span className="sh-mob-ic"><SIcon name="house" size={18}/></span>
+                <span className="sh-mob-label">Page d&apos;accueil</span>
+              </button>
               <button className="sh-mob-item sh-mob-logout" onClick={() => { setMobileMenu(false); logout() }}>
                 <span className="sh-mob-ic"><SIcon name="log-out" size={18}/></span>
                 <span className="sh-mob-label">Déconnexion</span>

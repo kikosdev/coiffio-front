@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import SIcon from '../../components/SIcon'
 import './TeamScreen.css'
 
@@ -281,10 +282,11 @@ function CongesTab({ team }) {
 ═══════════════════════════════════════════════════════════ */
 
 export default function TeamScreen() {
-  const [tab,      setTab]      = useState('membres')
-  const [team,     setTeam]     = useState(SEED_TEAM)
-  const [selected, setSelected] = useState(null)
-  const [modal,    setModal]    = useState(null) // null | 'add' | member
+  const [tab,        setTab]        = useState('membres')
+  const [team,       setTeam]       = useState(SEED_TEAM)
+  const [selected,   setSelected]   = useState(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [modal,      setModal]      = useState(null) // null | 'add' | member
 
   function saveMember(m) {
     setTeam(prev => prev.some(x => x.id === m.id)
@@ -304,6 +306,16 @@ export default function TeamScreen() {
     if (!window.confirm(`Supprimer ${m.nom} de l'équipe ?`)) return
     setTeam(prev => prev.filter(x => x.id !== m.id))
     setSelected(null)
+    setDetailOpen(false)
+  }
+
+  function openDetail(m) {
+    setSelected(m)
+    setDetailOpen(true)
+  }
+
+  function closeDetail() {
+    setDetailOpen(false)
   }
 
   return (
@@ -338,7 +350,7 @@ export default function TeamScreen() {
                   <button
                     key={m.id}
                     className={'tm-membre-row' + (selected?.id === m.id ? ' active' : '')}
-                    onClick={() => setSelected(m)}
+                    onClick={() => openDetail(m)}
                   >
                     <div className="tm-membre-av" style={{ background: m.color }}>{m.initials}</div>
                     <div className="tm-membre-info">
@@ -381,6 +393,42 @@ export default function TeamScreen() {
           onClose={() => setModal(null)}
           onSave={saveMember}
         />
+      )}
+
+      {/* ── Mobile horaires bottom-sheet ── */}
+      {createPortal(
+        <div
+          className={`tm-mob-modal${detailOpen && selected ? ' open' : ''}`}
+          onClick={closeDetail}
+        >
+          <div className="tm-mob-sheet" onClick={e => e.stopPropagation()}>
+            <div className="tm-mob-handle" />
+            <div className="tm-mob-topbar">
+              <button className="tm-mob-back" onClick={closeDetail}>
+                <SIcon name="arrow-left" size={16}/>
+                Retour
+              </button>
+              <button
+                className="sh-btn sh-btn-sm sh-btn-gold"
+                onClick={() => { closeDetail(); setModal(selected) }}
+              >
+                <SIcon name="pencil" size={13}/>Modifier
+              </button>
+            </div>
+            {selected && (
+              <div className="tm-mob-body">
+                <div className="sh-card" style={{ overflow:'hidden' }}>
+                  <HorairesPanel
+                    member={selected}
+                    onSave={saveHoraires}
+                    onDelete={deleteMember}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )

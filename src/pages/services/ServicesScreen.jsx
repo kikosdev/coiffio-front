@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import SIcon from '../../components/SIcon'
 import { useServiceStore, CATEGORY_LABELS, CATEGORY_COLORS } from '../../store/serviceStore'
 import './ServicesScreen.css'
@@ -39,24 +40,50 @@ function ConfirmDialog({ title, body, onConfirm, onCancel, danger }) {
   )
 }
 
-/* ── Kebab menu ── */
+/* ── Kebab menu — portalled to body so it never gets clipped by card siblings ── */
 function KebabMenu({ onEdit, onToggle, onDelete, isActive }) {
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [pos,  setPos]  = useState({ top: 0, right: 0 })
+  const btnRef  = useRef(null)
+  const menuRef = useRef(null)
 
   useEffect(() => {
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    if (!open) return
+    function close(e) {
+      if (
+        btnRef.current  && !btnRef.current.contains(e.target) &&
+        menuRef.current && !menuRef.current.contains(e.target)
+      ) setOpen(false)
+    }
     document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
+    document.addEventListener('touchstart', close)
+    return () => {
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('touchstart', close)
+    }
+  }, [open])
+
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      setPos({ top: r.bottom + 4, right: window.innerWidth - r.right })
+    }
+    setOpen(v => !v)
+  }
 
   return (
-    <div className="svc-kebab-wrap" ref={ref}>
-      <button className="svc-kebab" onClick={e => { e.stopPropagation(); setOpen(v => !v) }}>
+    <div className="svc-kebab-wrap">
+      <button ref={btnRef} className="svc-kebab" onClick={handleOpen}>
         <SIcon name="ellipsis-vertical" size={15}/>
       </button>
-      {open && (
-        <div className="svc-kebab-menu" onClick={e => e.stopPropagation()}>
+      {open && createPortal(
+        <div
+          ref={menuRef}
+          className="svc-kebab-menu"
+          style={{ position:'fixed', top: pos.top, right: pos.right, zIndex: 1000 }}
+          onClick={e => e.stopPropagation()}
+        >
           <button onClick={() => { setOpen(false); onEdit() }}>
             <SIcon name="pencil" size={13}/>Modifier
           </button>
@@ -68,7 +95,8 @@ function KebabMenu({ onEdit, onToggle, onDelete, isActive }) {
           <button className="danger" onClick={() => { setOpen(false); onDelete() }}>
             <SIcon name="trash-2" size={13}/>Supprimer
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -172,7 +200,7 @@ function ServiceFormModal({ initial, onSave, onClose, isSaving }) {
   }
 
   return (
-    <div className="svc-overlay" onClick={onClose}>
+    <div className="svc-overlay svc-form-overlay" onClick={onClose}>
       <div className="svc-modal" onClick={e => e.stopPropagation()}>
         <div className="svc-modal-header">
           <div className="svc-modal-title">

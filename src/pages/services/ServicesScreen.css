@@ -172,8 +172,8 @@
 }
 .svc-kebab:hover { background: var(--surface-inset); color: var(--ink); } /* ← était var(--ivoire) */
 .svc-kebab-menu {
-  position: absolute; right: 0; top: 30px; z-index: 50;
-  background: var(--surface); /* ← était #fff */
+  /* position/top/right/z-index set inline via portal + getBoundingClientRect */
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius); box-shadow: var(--shadow-card);
   min-width: 150px; padding: 4px;
@@ -453,4 +453,73 @@
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: none; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+════════════════════════════════════════════════════════════ */
+
+/* ≤768px — general mobile */
+@media (max-width: 768px) {
+  /* Page header: stack title + button */
+  .svc-page-head { flex-direction: column; gap: 12px; }
+  .svc-title { font-size: 30px; }
+
+  /* Toolbar: stack vertically, search full-width */
+  .svc-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .svc-search-wrap { min-width: 0; }
+  .svc-inactive-toggle { align-self: flex-start; }
+
+  /* Toast: above the mobile bottom nav */
+  .svc-toast { bottom: 80px; }
+
+  /* Drawer: full-width bottom sheet on mobile */
+  .svc-overlay-transparent { justify-content: center; align-items: flex-end; }
+  .svc-drawer {
+    width: 100%;
+    height: auto;
+    max-height: 85vh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -12px 60px rgba(28, 22, 18, .28);
+  }
+  .svc-drawer-footer { flex-wrap: wrap; }
+}
+
+/* ≤600px — form modal becomes a bottom sheet, rows stack */
+@media (max-width: 600px) {
+  /* Overlay: slide up from bottom */
+  .svc-form-overlay {
+    align-items: flex-end;
+    justify-content: stretch;
+  }
+  .svc-modal {
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 82vh;
+  }
+  /* Handle pill */
+  .svc-modal::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    border-radius: 99px;
+    background: var(--line-strong);
+    margin: 10px auto 0;
+  }
+  .svc-modal-header { padding: 12px 18px 10px; }
+  .svc-modal-body   { padding: 14px 18px; }
+  /* Sticky footer */
+  .svc-modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 12px 18px 20px;
+  }
+
+  /* Form rows: stack vertically instead of side by side */
+  .svc-form-row { flex-direction: column; gap: 0; }
+
+  /* Reset inline flex overrides that forced side-by-side layout */
+  .svc-field[style] { flex: 1 !important; }
 }

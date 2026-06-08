@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import SIcon from '../components/SIcon'
 import { useNotifications } from '../hooks/useNotifications'
@@ -240,7 +241,7 @@ function DayArc() {
 
   return (
     <div className="sh-card" style={{ padding: '16px 22px 12px', marginBottom: 24, overflow: 'hidden' }}>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
+      <div className="sh-arc-head">
         <div>
           <div className="sh-eyebrow">Arc of the day</div>
           <div className="sh-serif" style={{ fontSize:17, marginTop:2 }}>
@@ -250,7 +251,7 @@ function DayArc() {
             </span>
           </div>
         </div>
-        <div style={{ display:'flex', gap:18 }}>
+        <div className="sh-arc-stats">
           {[{ l:'Booked', v:<>82<span style={{fontSize:13,color:'var(--muted)'}}>%</span></> }, { l:'Revenue (D)', v:<>€<em style={{fontStyle:'italic',color:'var(--champagne-deep)'}}>2,148</em></> }, { l:'Walk-ins', v:'4' }].map((s,i) => (
             <div key={i} style={{ display:'flex',flexDirection:'column',gap:6 }}>
               <span style={{ fontSize:10.5,letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--muted)',fontWeight:500 }}>{s.l}</span>
@@ -708,7 +709,7 @@ function ScheduleScreen() {
           <h2>The day, in <em>motion</em>.</h2>
           <p>A live view of every chair. Available slots respect each stylist's shift hours; pending bookings settle once the client confirms.</p>
         </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+        <div className="sh-sch-controls">
           <div className="sh-seg">
             <button className={view==='day'?'on':''} onClick={() => setView('day')}>Day</button>
             <button className={view==='week'?'on':''} onClick={() => setView('week')}>Week</button>
@@ -1543,10 +1544,11 @@ function AddClientModal({ onClose, onAdd, initial }) {
 }
 
 function ClientsScreen() {
-  const [clients,  setClients]  = useState(MOCK_CLIENTS)
-  const [selected, setSelected] = useState(null)
-  const [search,   setSearch]   = useState('')
-  const [modal,    setModal]    = useState(null) // null | 'add' | client (for edit)
+  const [clients,     setClients]     = useState(MOCK_CLIENTS)
+  const [selected,    setSelected]    = useState(null)
+  const [detailOpen,  setDetailOpen]  = useState(false)
+  const [search,      setSearch]      = useState('')
+  const [modal,       setModal]       = useState(null) // null | 'add' | client (for edit)
 
   const filtered = clients.filter(c => {
     const q = search.toLowerCase()
@@ -1561,6 +1563,16 @@ function ClientsScreen() {
   function deleteClient(c) {
     setClients(prev => prev.filter(x => x.id !== c.id))
     setSelected(null)
+    setDetailOpen(false)
+  }
+
+  function openDetail(c) {
+    setSelected(c)
+    setDetailOpen(true)
+  }
+
+  function closeDetail() {
+    setDetailOpen(false)
   }
 
   return (
@@ -1595,7 +1607,7 @@ function ClientsScreen() {
               <button
                 key={c.id}
                 className={'sh-cl-row' + (selected?.id === c.id ? ' active' : '')}
-                onClick={() => setSelected(c)}
+                onClick={() => openDetail(c)}
               >
                 <div className="sh-cl-av">{clInitials(c.nom)}</div>
                 <div className="sh-cl-row-info">
@@ -1608,7 +1620,7 @@ function ClientsScreen() {
           </div>
         </div>
 
-        {/* ── Right: detail ── */}
+        {/* ── Right: detail — desktop only ── */}
         <div className="sh-cl-detail-panel">
           {selected ? (
             <ClientDetail
@@ -1631,6 +1643,97 @@ function ClientsScreen() {
           onAdd={saveClient}
           initial={modal === 'add' ? null : modal}
         />
+      )}
+
+      {/* ── Mobile client detail — bottom-sheet modal ── */}
+      {createPortal(
+        <div
+          className={`sh-cl-mob-modal${detailOpen && selected ? ' open' : ''}`}
+          onClick={closeDetail}
+        >
+          <div className="sh-cl-mob-sheet" onClick={e => e.stopPropagation()}>
+            <div className="sh-cl-mob-handle" />
+            <div className="sh-cl-mob-topbar">
+              <button className="sh-cl-mob-back" onClick={closeDetail}>
+                <SIcon name="arrow-left" size={16}/>
+                Retour
+              </button>
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="sh-btn sh-btn-sm" onClick={() => { closeDetail(); setModal(selected) }}>
+                  Modifier
+                </button>
+                <button className="sh-btn sh-btn-sm sh-btn-danger" onClick={() => deleteClient(selected)}>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+            {selected && (
+              <div className="sh-cl-mob-body">
+                {/* Profile */}
+                <div className="sh-cl-det-profile" style={{ padding:'0 20px 16px', borderBottom:'1px solid var(--line)' }}>
+                  <div className="sh-cl-av-lg">{clInitials(selected.nom)}</div>
+                  <div className="sh-cl-det-info">
+                    <div className="sh-cl-det-name">{selected.nom}</div>
+                    <div className="sh-cl-det-sub">{selected.email}</div>
+                    <div className="sh-cl-det-sub">{selected.phone}</div>
+                  </div>
+                </div>
+
+                {selected.notes && (
+                  <div className="sh-cl-det-note" style={{ margin:'0 20px' }}>
+                    Notes : <em>"{selected.notes}"</em>
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="sh-cl-stats" style={{ padding:'0 20px' }}>
+                  <div className="sh-cl-stat">
+                    <div className="sh-cl-stat-lbl">VISITES</div>
+                    <div className="sh-cl-stat-val">{selected.visits || 0}</div>
+                  </div>
+                  <div className="sh-cl-stat">
+                    <div className="sh-cl-stat-lbl">CA TOTAL</div>
+                    <div className="sh-cl-stat-val sh-cl-stat-ca">
+                      {selected.ca > 0 ? <>{selected.ca} <span>€</span></> : '—'}
+                    </div>
+                  </div>
+                  <div className="sh-cl-stat">
+                    <div className="sh-cl-stat-lbl">DERNIER</div>
+                    <div className="sh-cl-stat-val sh-cl-stat-date">{fmtDate(selected.lastVisit)}</div>
+                  </div>
+                </div>
+
+                {/* History */}
+                <div className="sh-cl-hist" style={{ padding:'0 20px 32px' }}>
+                  <div className="sh-cl-hist-title">Historique des rendez-vous</div>
+                  {(VISIT_HISTORY[selected.id] || []).length === 0 ? (
+                    <div className="sh-cl-hist-empty">Aucune visite enregistrée.</div>
+                  ) : (
+                    <div className="sh-cl-hist-list">
+                      {(VISIT_HISTORY[selected.id] || []).map((v, i) => (
+                        <div key={i} className="sh-cl-hist-row">
+                          <div className="sh-cl-hist-left">
+                            <div className="sh-cl-hist-name">{v.service}</div>
+                            <div className="sh-cl-hist-who">
+                              Le {fmtDateLong(v.date)} à {v.heure} • avec {v.stylist}
+                            </div>
+                          </div>
+                          <div className="sh-cl-hist-right">
+                            <div className="sh-cl-hist-amt">{v.montant} €</div>
+                            <span className={'sh-cl-badge ' + (v.status === 'pending' ? 'pending' : 'completed')}>
+                              {v.status === 'pending' ? 'Pending' : 'Completed'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -1693,16 +1796,27 @@ const TOPBAR_META = {
 }
 
 export default function SalonDashboard() {
-  const navigate    = useNavigate()
-  const [current,   setCurrent]   = useState('accueil')
-  const [role,      setRole]      = useState('employee')
-  const [collapsed, setCollapsed] = useState(false)
+  const navigate      = useNavigate()
+  const [current,     setCurrent]     = useState('accueil')
+  const [role,        setRole]        = useState('employee')
+  const [collapsed,   setCollapsed]   = useState(false)
+  const [mobileMenu,  setMobileMenu]  = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenu ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileMenu])
 
   function logout() {
     disconnectSocket()
     localStorage.removeItem('haire_role')
     localStorage.removeItem('haire_token')
     navigate('/signin')
+  }
+
+  function navTo(id) {
+    setCurrent(id)
+    setMobileMenu(false)
   }
 
   const meta    = TOPBAR_META[current] || TOPBAR_META.accueil
@@ -1767,6 +1881,14 @@ export default function SalonDashboard() {
               <kbd>⌘K</kbd>
             </div>
             <NotifBell/>
+            {/* Mobile-only hamburger — reveals full sidebar drawer */}
+            <button
+              className="sh-mob-menu-btn"
+              onClick={() => setMobileMenu(true)}
+              aria-label="Ouvrir le menu"
+            >
+              <SIcon name="menu" size={20} strokeWidth={1.6}/>
+            </button>
           </div>
         </header>
 
@@ -1788,6 +1910,54 @@ export default function SalonDashboard() {
 
       {/* Mobile bottom tab bar — hidden on desktop, shown at ≤768px */}
       <MobileNav current={current} setCurrent={setCurrent} />
+
+      {/* Mobile sidebar drawer — portalled to body to escape any stacking context */}
+      {createPortal(
+        <div
+          className={`sh-mob-overlay${mobileMenu ? ' open' : ''}`}
+          onClick={() => setMobileMenu(false)}
+        >
+          <div className="sh-mob-panel" onClick={e => e.stopPropagation()}>
+            {/* Close */}
+            <button className="sh-mob-close" onClick={() => setMobileMenu(false)} aria-label="Fermer">
+              <SIcon name="x" size={18} strokeWidth={1.6}/>
+            </button>
+
+            {/* Brand */}
+            <div className="sh-mob-brand">
+              <div className="sh-mob-brand-row">
+                <span className="sh-mob-mark">Haire</span>
+                <span className="sh-mob-dot"/>
+              </div>
+              <span className="sh-mob-sub">Ivory Éditorial</span>
+            </div>
+
+            {/* Nav items */}
+            <div className="sh-mob-section">Navigation</div>
+            <nav className="sh-mob-nav">
+              {NAV_ITEMS.map(n => (
+                <button
+                  key={n.id}
+                  className={'sh-mob-item' + (current === n.id ? ' active' : '')}
+                  onClick={() => navTo(n.id)}
+                >
+                  <span className="sh-mob-ic"><SIcon name={n.icon} size={18}/></span>
+                  <span className="sh-mob-label">{n.label}</span>
+                </button>
+              ))}
+            </nav>
+
+            {/* Logout */}
+            <div className="sh-mob-foot">
+              <button className="sh-mob-item sh-mob-logout" onClick={() => { setMobileMenu(false); logout() }}>
+                <span className="sh-mob-ic"><SIcon name="log-out" size={18}/></span>
+                <span className="sh-mob-label">Déconnexion</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

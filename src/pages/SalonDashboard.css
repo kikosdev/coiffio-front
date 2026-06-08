@@ -1126,6 +1126,167 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MOBILE SIDEBAR DRAWER
+═══════════════════════════════════════════════════════════ */
+
+/* Hamburger trigger — hidden on desktop, visible at ≤768px */
+.sh-mob-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+}
+.sh-mob-menu-btn:hover { border-color: var(--champagne); background: var(--surface-2); }
+
+@media (max-width: 768px) {
+  .sh-mob-menu-btn { display: flex; }
+}
+
+/* Overlay backdrop */
+.sh-mob-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(28, 22, 18, 0);
+  pointer-events: none;
+  visibility: hidden;
+  transition: background .3s ease, visibility 0s linear .3s;
+}
+.sh-mob-overlay.open {
+  background: rgba(28, 22, 18, .52);
+  pointer-events: auto;
+  visibility: visible;
+  transition: background .3s ease;
+}
+
+/* Slide-in panel */
+.sh-mob-panel {
+  position: absolute;
+  top: 0; left: 0;
+  width: min(82vw, 280px);
+  height: 100%;
+  background: var(--bg-2);
+  border-right: 1px solid var(--line);
+  box-shadow: 20px 0 60px rgba(0, 0, 0, .22);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+}
+.sh-mob-overlay.open .sh-mob-panel { transform: translateX(0); }
+
+/* Close button */
+.sh-mob-close {
+  position: absolute;
+  top: 18px; right: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.sh-mob-close:hover { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+/* Brand */
+.sh-mob-brand {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px 6px;
+}
+.sh-mob-brand-row {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.sh-mob-mark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.sh-mob-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--champagne);
+  margin: 0 1px 5px;
+  flex-shrink: 0;
+}
+.sh-mob-sub {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding-top: 2px;
+}
+
+/* Section label */
+.sh-mob-section {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  font-weight: 600;
+  padding: 18px 20px 6px;
+}
+
+/* Nav list */
+.sh-mob-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 10px;
+  flex: 1;
+}
+
+/* Nav item */
+.sh-mob-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius);
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background .15s, color .15s;
+}
+.sh-mob-item:hover { background: var(--surface); color: var(--ink); }
+.sh-mob-item.active { background: var(--champagne-soft); color: var(--champagne-deep); }
+.sh-mob-item.active .sh-mob-ic { color: var(--champagne-deep); }
+.sh-mob-ic { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sh-mob-label { flex: 1; }
+
+/* Footer / logout */
+.sh-mob-foot {
+  padding: 8px 10px 28px;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+.sh-mob-logout { color: var(--muted); }
+.sh-mob-logout:hover { background: rgba(168, 74, 58, .08); color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════════
    MOBILE BOTTOM TAB BAR
 ═══════════════════════════════════════════════════════════ */
 
@@ -1189,6 +1350,97 @@
   min-width: 14px;
   text-align: center;
   line-height: 1.4;
+}
+
+/* ─── Mobile client detail bottom-sheet ─── */
+.sh-cl-mob-modal {
+  display: none; /* visible only at ≤768px via media query */
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(20, 16, 12, 0);
+  pointer-events: none;
+  visibility: hidden;
+  transition: background .3s ease, visibility 0s linear .3s;
+}
+.sh-cl-mob-modal.open {
+  background: rgba(20, 16, 12, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: auto;
+  visibility: visible;
+  transition: background .3s ease;
+}
+.sh-cl-mob-sheet {
+  position: absolute;
+  bottom: 64px; /* sit above bottom nav */
+  left: 0;
+  right: 0;
+  max-height: calc(88vh - 64px);
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+  box-shadow: 0 -12px 60px rgba(28, 22, 18, .3);
+}
+.sh-cl-mob-modal.open .sh-cl-mob-sheet {
+  transform: translateY(0);
+}
+.sh-cl-mob-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--line-strong);
+  margin: 12px auto 0;
+}
+.sh-cl-mob-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.sh-cl-mob-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  padding: 0;
+}
+.sh-cl-mob-back:hover { color: var(--ink); }
+.sh-cl-mob-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+/* ─── Arc of the day card ─── */
+.sh-arc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+.sh-arc-stats {
+  display: flex;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+/* ─── Schedule controls row ─── */
+.sh-sch-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1280,6 +1532,20 @@
 
   /* Toast position: above bottom nav */
   .nbm-toast { bottom: 80px; }
+
+  /* ── Clients mobile modal ── */
+  .sh-cl-mob-modal { display: block; }
+
+  /* ── Schedule ── */
+  .sh-page-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .sh-sch-controls { width: 100%; flex-wrap: wrap; gap: 8px; }
+  .sh-arc-head { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .sh-arc-stats { gap: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .sh-legend { flex-wrap: wrap; gap: 10px 14px; margin-bottom: 14px; }
+  .sh-schedule-grid { overflow-x: auto; gap: 6px; }
+  .sh-cols { grid-template-columns: repeat(4, 175px); overflow-x: unset; }
+  .sh-time-col { padding-top: 94px; min-width: 52px; }
+  .sh-time-tick { width: 48px; }
 }
 
 /* ≤480px — small phone */
@@ -1292,4 +1558,7 @@
   .sh-cat-grid { grid-template-columns: 1fr; }
   .sh-perf-row { grid-template-columns: 36px 1fr 70px; }
   .sh-page-head h2 { font-size: 28px; }
+  .sh-sch-controls { gap: 6px; }
+  .sh-cols { grid-template-columns: repeat(4, 160px); }
+  .sh-arc-stats { gap: 10px; }
 }

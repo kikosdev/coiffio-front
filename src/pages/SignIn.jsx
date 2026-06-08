@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SIcon from '../components/SIcon'
 import { connectSocket } from '../services/socket'
+import styles from './SignIn.module.css'
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'
 
@@ -64,13 +65,9 @@ export default function SignIn() {
   const isOwner = tab === 'owner'
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh', background: 'var(--bg)' }}>
+    <div className={styles.page}>
       {/* Art panel */}
-      <div style={{
-        position: 'relative', overflow: 'hidden', background: 'var(--ink)',
-        padding: '56px 64px', display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between', color: 'var(--surface)'
-      }}>
+      <div className={styles.artPanel}>
         <div className={`ph ${isOwner ? 'ph-7' : 'ph-3'}`} style={{ position: 'absolute', inset: 0, opacity: 0.7, transition: 'all .4s' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(20,16,12,.4) 0%, rgba(20,16,12,.92) 100%)' }} />
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -97,7 +94,7 @@ export default function SignIn() {
       </div>
 
       {/* Form panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '56px 96px', maxWidth: 640 }}>
+      <div className={styles.formPanel}>
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface-inset)', border: '1px solid var(--line)', borderRadius: 99, padding: 4, marginBottom: 36, width: 'fit-content' }}>
           {[

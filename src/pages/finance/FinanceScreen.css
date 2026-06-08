@@ -355,3 +355,95 @@
   font-family: var(--sans);
 }
 .fin-cancel:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+═══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* ── Top row: stack tabs above controls ── */
+  .fin-toprow {
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: 0;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  /* Tabs: horizontal scroll so all labels are reachable */
+  .fin-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .fin-tabs::-webkit-scrollbar { display: none; }
+  .fin-tab { padding: 10px 14px 12px; font-size: 13px; }
+
+  /* Controls: wrap below tabs */
+  .fin-controls {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Period pills: slightly compact */
+  .fin-period-btn { padding: 5px 10px; font-size: 12px; }
+
+  /* ── CA Hero: smaller number ── */
+  .fin-ca-hero { padding: 24px 20px 20px; gap: 8px; }
+  .fin-ca-num  { font-size: 48px; }
+  .fin-ca-cur  { font-size: 30px; }
+
+  /* ── Two-column → single column ── */
+  .fin-two-col { grid-template-columns: 1fr; }
+
+  /* ── Card head: stack title/sub + button vertically ── */
+  .fin-card-head { flex-direction: column; gap: 10px; padding: 18px 18px 14px; }
+
+  /* ── Frais rows: amount + delete button wrap below title ── */
+  .fin-frais-row   { flex-wrap: wrap; gap: 8px; padding: 12px 18px; }
+  .fin-frais-right { width: 100%; justify-content: space-between; }
+
+  /* ── Paiements rows: tighter padding ── */
+  .fin-pay-row { padding: 12px 18px; }
+
+  /* ── Modal: bottom sheet ── */
+  .fin-overlay { align-items: flex-end; }
+  .fin-modal {
+    width: 100%;
+    border-radius: 18px 18px 0 0;
+    max-height: 82vh;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  /* Handle pill */
+  .fin-modal::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    border-radius: 99px;
+    background: var(--line-strong);
+    margin: 12px auto 0;
+  }
+  .fin-modal-title { padding: 16px 20px 0; font-size: 20px; }
+  .fin-form        { padding: 16px 20px 8px; }
+  /* Sticky footer */
+  .fin-modal-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 12px 20px 20px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fin-tab     { padding: 9px 12px 11px; font-size: 12.5px; }
+  .fin-ca-num  { font-size: 40px; }
+  .fin-ca-cur  { font-size: 24px; }
+  .fin-card-head { padding: 14px 14px 12px; }
+  .fin-frais-row { padding: 10px 14px; }
+  .fin-pay-row   { padding: 10px 14px; }
+}

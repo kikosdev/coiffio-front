@@ -1,15 +1,25 @@
 .nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 18px 56px;
-  background: rgba(243, 236, 224, 0.78);
+  background: rgba(243, 236, 224, 0.72);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid transparent;
+  transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+/* Solid state once the user has scrolled past the hero top edge */
+.scrolled {
+  background: rgba(243, 236, 224, 0.96);
+  border-bottom-color: var(--line);
+  box-shadow: 0 1px 0 var(--line), 0 4px 24px rgba(28, 22, 18, 0.07);
 }
 
 .brand {
@@ -125,13 +135,16 @@
   border-color: var(--ink);
 }
 
-/* Mobile drawer */
+/* Mobile drawer — portalled to document.body, always in the DOM */
 .drawer {
-  display: none;
   position: fixed;
-  inset: 0;
-  z-index: 60;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 200;
   background: rgba(20, 16, 12, 0);
+  pointer-events: none;
   visibility: hidden;
   transition: background .3s ease, visibility 0s linear .3s;
 }
@@ -140,6 +153,7 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   visibility: visible;
+  pointer-events: auto;
   transition: background .3s ease;
 }
 .drawerPanel {
@@ -159,6 +173,29 @@
   transition: transform .32s cubic-bezier(.4, 0, .2, 1);
 }
 .drawerOn .drawerPanel { transform: translateX(0); }
+
+.drawerClose {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
+.drawerClose:hover {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
 
 .drawerLinks {
   display: flex;
@@ -207,7 +244,6 @@
   .locale { display: none; }
   .signin { display: none; }
   .burger { display: inline-flex; }
-  .drawer { display: block; }
 }
 
 /* ── Small phone (≤520px) ── */

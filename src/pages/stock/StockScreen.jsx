@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import SIcon from '../../components/SIcon'
 import './StockScreen.css'
 
@@ -300,11 +301,15 @@ function ProduitDetail({ produit, fournisseurs, onAjuster, onSupprimer, onUpdate
 
 /* ─── Produits tab ─── */
 function ProduitsTab() {
-  const [produits, setProduits] = useState(SEED_PRODUITS)
-  const [fournisseurs]          = useState(SEED_FOURNISSEURS)
-  const [selected, setSelected] = useState(null)
-  const [search, setSearch]     = useState('')
-  const [modal, setModal]       = useState(null)
+  const [produits, setProduits]     = useState(SEED_PRODUITS)
+  const [fournisseurs]              = useState(SEED_FOURNISSEURS)
+  const [selected, setSelected]     = useState(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [search, setSearch]         = useState('')
+  const [modal, setModal]           = useState(null)
+
+  function openDetail(p) { setSelected(p); setDetailOpen(true) }
+  function closeDetail()  { setDetailOpen(false) }
 
   const filtered = useMemo(() =>
     produits
@@ -331,6 +336,7 @@ function ProduitsTab() {
   function deleteProduit(id) {
     setProduits(p => p.filter(x => x.id !== id))
     setSelected(null)
+    setDetailOpen(false)
   }
 
   const selectedFull = produits.find(p => p.id === selected?.id) ?? null
@@ -358,7 +364,7 @@ function ProduitsTab() {
             const isActive = selectedFull?.id === p.id
             return (
               <div key={p.id} className={['stk-row', isActive && 'active', low && 'low', !p.visibleLanding && 'hidden-landing'].filter(Boolean).join(' ')}
-                onClick={() => setSelected(p)}>
+                onClick={() => openDetail(p)}>
                 <div className="stk-row-icon"><SIcon name="box" size={16}/></div>
                 <div className="stk-row-info">
                   <div className="stk-row-nom">
@@ -413,6 +419,31 @@ function ProduitsTab() {
           onSave={saveModal}
         />
       )}
+
+      {createPortal(
+        <div className={`stk-mob-modal${detailOpen && selectedFull ? ' open' : ''}`} onClick={closeDetail}>
+          <div className="stk-mob-sheet" onClick={e => e.stopPropagation()}>
+            <div className="stk-mob-handle"/>
+            <div className="stk-mob-topbar">
+              <button className="stk-mob-back" onClick={closeDetail}>
+                <SIcon name="arrow-left" size={16}/>Retour
+              </button>
+            </div>
+            {selectedFull && (
+              <div className="stk-mob-body">
+                <ProduitDetail
+                  produit={selectedFull}
+                  fournisseurs={fournisseurs}
+                  onAjuster={() => { closeDetail(); setModal(selectedFull) }}
+                  onSupprimer={() => deleteProduit(selectedFull.id)}
+                  onUpdate={patch => updateProduit(selectedFull.id, patch)}
+                />
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
@@ -441,7 +472,11 @@ function FournisseurDetail({ f, onSupprimer }) {
 function FournisseursTab() {
   const [fournisseurs, setFournisseurs] = useState(SEED_FOURNISSEURS)
   const [selected, setSelected]         = useState(fournisseurs[0] ?? null)
+  const [detailOpen, setDetailOpen]     = useState(false)
   const [modal, setModal]               = useState(false)
+
+  function openDetail(f) { setSelected(f); setDetailOpen(true) }
+  function closeDetail()  { setDetailOpen(false) }
 
   function addF(data) {
     const f = { ...data, id: Date.now() }
@@ -452,6 +487,7 @@ function FournisseursTab() {
     const next = fournisseurs.filter(f => f.id !== id)
     setFournisseurs(next)
     setSelected(next[0] ?? null)
+    setDetailOpen(false)
   }
 
   const selectedFull = fournisseurs.find(f => f.id === selected?.id) ?? null
@@ -475,7 +511,7 @@ function FournisseursTab() {
           )}
           {fournisseurs.map(f => (
             <div key={f.id} className={['stk-fourn-row-item', selectedFull?.id === f.id && 'active'].filter(Boolean).join(' ')}
-              onClick={() => setSelected(f)}>
+              onClick={() => openDetail(f)}>
               <span className="stk-fourn-row-nom">{f.nom}</span>
               <SIcon name="chevron-right" size={14}/>
             </div>
@@ -495,6 +531,25 @@ function FournisseursTab() {
       </div>
 
       {modal && <FournisseurModal onClose={() => setModal(false)} onSave={addF}/>}
+
+      {createPortal(
+        <div className={`stk-mob-modal${detailOpen && selectedFull ? ' open' : ''}`} onClick={closeDetail}>
+          <div className="stk-mob-sheet" onClick={e => e.stopPropagation()}>
+            <div className="stk-mob-handle"/>
+            <div className="stk-mob-topbar">
+              <button className="stk-mob-back" onClick={closeDetail}>
+                <SIcon name="arrow-left" size={16}/>Retour
+              </button>
+            </div>
+            {selectedFull && (
+              <div className="stk-mob-body">
+                <FournisseurDetail f={selectedFull} onSupprimer={() => deleteF(selectedFull.id)}/>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

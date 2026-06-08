@@ -26,10 +26,11 @@ function fmtEur(n) {
 
 /* ─── Caisse Directe modal ─── */
 function CaisseModal({ onClose, onTicket }) {
-  const [cart, setCart]       = useState([])   // [{id, nom, prix, qty}]
-  const [search, setSearch]   = useState('')
-  const [methode, setMethode] = useState('carte') // 'carte' | 'especes'
-  const [remise, setRemise]   = useState('')
+  const [cart, setCart]         = useState([])
+  const [search, setSearch]     = useState('')
+  const [methode, setMethode]   = useState('carte')
+  const [remise, setRemise]     = useState('')
+  const [activeTab, setActiveTab] = useState('catalog')
 
   const filtered = useMemo(() =>
     CATALOG.filter(p =>
@@ -70,6 +71,9 @@ function CaisseModal({ onClose, onTicket }) {
   return (
     <div className="vt-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="vt-caisse-modal">
+        {/* Mobile handle — tap to close */}
+        <div className="vt-mob-drag-handle" onClick={onClose}/>
+
         {/* Header */}
         <div className="vt-caisse-header">
           <div>
@@ -79,9 +83,24 @@ function CaisseModal({ onClose, onTicket }) {
           <button className="vt-close-btn" onClick={onClose}><SIcon name="x" size={18}/></button>
         </div>
 
+        {/* Mobile-only tab switcher */}
+        <div className="vt-mob-tabs">
+          <button
+            className={`vt-mob-tab${activeTab === 'catalog' ? ' active' : ''}`}
+            onClick={() => setActiveTab('catalog')}>
+            <SIcon name="box" size={13}/>Catalogue
+          </button>
+          <button
+            className={`vt-mob-tab${activeTab === 'cart' ? ' active' : ''}`}
+            onClick={() => setActiveTab('cart')}>
+            <SIcon name="shopping-cart" size={13}/>
+            Panier{cart.length > 0 ? ` (${cart.length})` : ''}
+          </button>
+        </div>
+
         <div className="vt-caisse-body">
           {/* Left: catalog */}
-          <div className="vt-caisse-left">
+          <div className={`vt-caisse-left${activeTab !== 'catalog' ? ' vt-mob-hidden' : ''}`}>
             <div className="vt-caisse-search">
               <SIcon name="search" size={14}/>
               <input placeholder="Rechercher un produit…" value={search} onChange={e => setSearch(e.target.value)}/>
@@ -104,7 +123,7 @@ function CaisseModal({ onClose, onTicket }) {
           </div>
 
           {/* Right: cart + payment */}
-          <div className="vt-caisse-right">
+          <div className={`vt-caisse-right${activeTab !== 'cart' ? ' vt-mob-hidden' : ''}`}>
             <div className="vt-cart-title">Panier</div>
 
             {cart.length === 0

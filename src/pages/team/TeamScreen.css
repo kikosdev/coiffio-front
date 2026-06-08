@@ -184,3 +184,93 @@
   font-family: var(--sans);
 }
 .tm-cancel:hover { color: var(--ink); }
+
+/* ─── Mobile horaires bottom-sheet ─── */
+.tm-mob-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(20, 16, 12, 0);
+  pointer-events: none;
+  visibility: hidden;
+  transition: background .3s ease, visibility 0s linear .3s;
+}
+.tm-mob-modal.open {
+  background: rgba(20, 16, 12, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: auto;
+  visibility: visible;
+  transition: background .3s ease;
+}
+.tm-mob-sheet {
+  position: absolute;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  max-height: calc(90vh - 64px);
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+  box-shadow: 0 -12px 60px rgba(28, 22, 18, .3);
+}
+.tm-mob-modal.open .tm-mob-sheet { transform: translateY(0); }
+
+.tm-mob-handle {
+  width: 40px; height: 4px; border-radius: 99px;
+  background: var(--line-strong); margin: 12px auto 0;
+}
+.tm-mob-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px 12px; border-bottom: 1px solid var(--line);
+}
+.tm-mob-back {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--muted); background: none;
+  border: none; cursor: pointer; font-family: var(--sans); padding: 0;
+}
+.tm-mob-back:hover { color: var(--ink); }
+.tm-mob-body { padding: 16px; }
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .tm-mob-modal { display: block; }
+  .tm-membres-layout { grid-template-columns: 1fr; }
+  .tm-horaires-wrap { display: none; }
+  .tm-hor-times { flex-wrap: wrap; gap: 6px; }
+  .tm-hor-check { min-width: 120px; }
+
+  /* Add/edit member modal: bottom sheet */
+  .tm-overlay { align-items: flex-end; }
+  .tm-modal-card {
+    width: 100%;
+    border-radius: 18px 18px 0 0;
+    max-height: 82vh;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  /* Handle pill */
+  .tm-modal-card::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    border-radius: 99px;
+    background: var(--line-strong);
+    margin: 12px auto 0;
+  }
+  .tm-modal-title { padding: 16px 22px 0; font-size: 20px; }
+  .tm-form        { padding: 16px 22px 0; }
+  .tm-form-row    { grid-template-columns: 1fr; gap: 14px; }
+  /* Sticky footer */
+  .tm-modal-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 14px 22px 20px;
+    margin-top: 4px;
+  }
+}

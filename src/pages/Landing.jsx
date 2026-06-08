@@ -387,6 +387,7 @@ function VisitSection() {
 
 export default function Landing() {
   const { hash } = useLocation()
+  const [showTop, setShowTop] = useState(false)
 
   useEffect(() => {
     if (!hash) return
@@ -396,8 +397,14 @@ export default function Landing() {
     return () => clearTimeout(timer)
   }, [hash])
 
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <div style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh', paddingTop: 76 }}>
       <TopNav />
       <HeroSection />
       <PathsSection />
@@ -408,6 +415,15 @@ export default function Landing() {
       <VisitSection />
       <ProductsSection />
       <SiteFooter />
+
+      {/* Scroll-to-top button */}
+      <button
+        className={`${styles.toTopBtn}${showTop ? ' ' + styles.toTopVisible : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Retour en haut"
+      >
+        <SIcon name="arrow-up" size={18} strokeWidth={1.8} />
+      </button>
     </div>
   )
 }

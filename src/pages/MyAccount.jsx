@@ -134,7 +134,7 @@ function Sidebar({ tab, changeTab }) {
 /* ── Shared ── */
 function SectionTitle({ title, sub }) {
   return (
-    <div style={{ marginBottom: 32 }}>
+    <div className="ma-section-title">
       <h1 className="ma-section-h1" dangerouslySetInnerHTML={{ __html: title }} />
       {sub && <div style={{ color: 'var(--muted)', fontSize: 13.5 }}>{sub}</div>}
     </div>

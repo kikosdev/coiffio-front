@@ -1,0 +1,334 @@
+/* Sign In "Maison Haire" — design importé de Claude Design (handoff bundle).
+   Tokens scopés à .signin-page (n'écrase pas le backoffice). */
+.signin-page {
+  --bg: #f3ece0; --bg-2: #ebe2d2; --surface: #faf6ee; --surface-2: #f6f0e3; --surface-inset: #ede4d2;
+  --ink: #1c1612; --ink-2: #2a221a; --ink-soft: #4a3d31; --muted: #7a6a58; --muted-2: #9a8c79;
+  --line: rgba(28, 22, 18, 0.10); --line-strong: rgba(28, 22, 18, 0.22);
+  --champagne: #b89968; --champagne-deep: #8e7142; --champagne-soft: rgba(184, 153, 104, 0.14);
+  --success: #6b8e6a; --pending: #c9925a; --danger: #a84a3a;
+  --shadow-soft: 0 1px 2px rgba(28,22,18,.04), 0 4px 16px rgba(28,22,18,.06);
+  --shadow-card: 0 1px 2px rgba(28,22,18,.05), 0 12px 32px rgba(28,22,18,.08);
+  --radius-sm: 6px; --radius: 10px; --radius-lg: 16px; --radius-xl: 24px;
+  --serif: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  --sans: 'Inter', ui-sans-serif, -apple-system, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: var(--sans);
+}
+
+/* ── Placeholder tones ── */
+.ph {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 80% at 30% 30%, rgba(255,255,255,.18), transparent 60%),
+    radial-gradient(80% 80% at 80% 80%, rgba(0,0,0,.25), transparent 60%),
+    linear-gradient(135deg, #a08568, #5c4a35);
+}
+.ph::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.03) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,.18) 100%);
+  mix-blend-mode: multiply;
+}
+.ph.ph-2 { background: linear-gradient(160deg, #c9b89a, #8a7556 60%, #4a3d2e); }
+.ph.ph-3 { background: linear-gradient(170deg, #d8c4a4, #a0805e 50%, #2e2418); }
+.ph.ph-4 { background: linear-gradient(150deg, #b8a07e, #7d654a 60%, #2a2118); }
+.ph.ph-5 { background: linear-gradient(140deg, #e0d2b8, #b89968 60%, #5c4a35); }
+.ph.ph-6 { background: linear-gradient(180deg, #efe4d2, #c9b89a 50%, #8a7556); }
+.ph.ph-7 { background: linear-gradient(135deg, #3a2e22, #1a1410); }
+
+/* ── Sign in layout ── */
+.signin-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  background: var(--bg);
+}
+.signin-art {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  padding: 56px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--surface);
+}
+.signin-art .ph {
+  position: absolute; inset: 0;
+  opacity: 0.7;
+}
+.signin-art::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,16,12,.4) 0%, rgba(20,16,12,.92) 100%);
+}
+.signin-art > * { position: relative; z-index: 2; }
+.signin-art .top-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.signin-art .top-row a {
+  font-size: 13px;
+  color: rgba(243,236,224,.7);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center; gap: 6px;
+}
+.signin-art .top-row a:hover { color: var(--surface); }
+.signin-art .brand-big {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 80px;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.signin-art .brand-big .dot { color: var(--champagne); }
+.signin-art .tagline {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  max-width: 460px;
+}
+.signin-art .tagline em { font-style: italic; color: var(--champagne); }
+.signin-art .bottom-row {
+  font-size: 12px;
+  color: rgba(243,236,224,.55);
+  letter-spacing: 0.08em;
+}
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 56px 96px;
+  max-width: 640px;
+}
+.signin-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--surface-inset);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 4px;
+  margin-bottom: 36px;
+  width: fit-content;
+}
+.signin-tabs button {
+  background: transparent;
+  border: 0;
+  padding: 9px 18px;
+  border-radius: 99px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .25s ease;
+  white-space: nowrap;
+}
+.signin-tabs button.on {
+  background: var(--ink);
+  color: var(--surface);
+}
+.signin-form h1 {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin: 0 0 14px;
+}
+.signin-form h1 em { font-style: italic; color: var(--champagne-deep); font-weight: 400; }
+.signin-form .lead {
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 32px;
+  max-width: 440px;
+}
+
+.fields { display: flex; flex-direction: column; gap: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fancy-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fancy-field label {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.fancy-field input {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-size: 14.5px;
+  color: var(--ink);
+  outline: none;
+  transition: all .2s ease;
+  font-family: var(--sans);
+}
+.fancy-field input::placeholder { color: var(--muted-2); }
+.fancy-field input:focus {
+  border-color: var(--ink);
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.signin-row-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.signin-row-foot label {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.signin-row-foot label input { accent-color: var(--ink); }
+.signin-row-foot a {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.signin-cta {
+  margin-top: 28px;
+  width: 100%;
+  background: var(--ink);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.signin-cta:hover { background: var(--champagne); color: #1c1612; }
+
+.signin-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 28px 0;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.signin-divider::before, .signin-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.social-btn {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .2s ease;
+}
+.social-btn:hover { background: var(--surface-2); border-color: var(--line-strong); }
+
+.guest-row {
+  margin-top: 32px;
+  padding: 18px 22px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.guest-row .lhs { display: flex; flex-direction: column; gap: 3px; }
+.guest-row .lhs .t {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink);
+}
+.guest-row .lhs .s { font-size: 12px; color: var(--muted); }
+.guest-row a {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 9px 16px;
+  border-radius: 99px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.guest-row a:hover { border-color: var(--ink); }
+
+
+/* ── Owner access (3e onglet, calqué sur la 2e image) ── */
+.signin-tabs button.owner.on { background: var(--champagne-deep); color: #faf6ee; }
+.signin-tabs button.owner.on em { color: #faf6ee; }
+.owner-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--champagne-deep); font-weight: 600; margin-bottom: 14px;
+}
+.owner-eyebrow .ico {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--champagne-soft); color: var(--champagne-deep);
+}
+.signin-cta.gold { background: var(--champagne-deep); color: #faf6ee; }
+.signin-cta.gold:hover { background: var(--champagne); color: #1c1612; }
+.owner-note {
+  margin-top: 18px; display: flex; gap: 10px; align-items: flex-start;
+  border: 1px dashed var(--line-strong); border-radius: var(--radius);
+  padding: 14px 16px; font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.owner-note strong { color: var(--ink); font-weight: 600; }
+.pwd-wrap { position: relative; display: flex; align-items: center; }
+.pwd-wrap input { width: 100%; padding-right: 40px; }
+.pwd-wrap .eye {
+  position: absolute; right: 12px; background: transparent; border: 0;
+  color: var(--muted); cursor: pointer; display: inline-flex;
+}
+.signin-error { color: var(--danger); font-size: 13px; margin-top: 12px; }
+
+/* ── Responsive : empile les deux panneaux ── */
+@media (max-width: 880px) {
+  .signin-page { grid-template-columns: 1fr; }
+  .signin-art { min-height: 280px; }
+  .signin-form { padding: 32px 22px; }
+}

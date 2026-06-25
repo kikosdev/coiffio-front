@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Plus, Pencil, Trash2, Shield, ShieldCheck, KeyRound, Crown, MapPin, Clock, Phone, Bell, Laptop, Smartphone, Tablet, LogOut, UserRound, Store, Eye, EyeOff } from 'lucide-react';
 import { Card, CardBody, CardHeader, CardTitle, Button, Input, Modal } from '@/shared/ui';
-import { useSettingsStore, type SalonConfig, type SalonRole, type BusinessHour } from './settingsStore';
+import { useSettingsStore, type SalonRole, type BusinessHour } from './settingsStore';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNavigate } from 'react-router-dom';
 import api, { ApiError } from '@/shared/api/client';

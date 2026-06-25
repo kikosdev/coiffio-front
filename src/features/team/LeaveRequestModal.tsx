@@ -20,7 +20,7 @@ export function LeaveRequestModal({ open, onClose, canPickMember = false }: Leav
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const members = staff.filter((s) => s.role !== 'client');
+  const members = staff.filter((s) => (s.role as string) !== 'client');
 
   const submit = async () => {
     if (!form.from || !form.to) {

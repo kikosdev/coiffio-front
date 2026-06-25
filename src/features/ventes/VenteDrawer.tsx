@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Minus, Plus, Trash2 } from 'lucide-react';
-import { Badge, Button } from '@/shared/ui';
+import { Badge } from '@/shared/ui';
 import { api, ApiError } from '@/shared/api/client';
 import { useSalesStore } from './salesStore';
 import type { Product } from '@/features/stock/stockStore';

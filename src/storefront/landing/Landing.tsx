@@ -115,7 +115,7 @@ function TopNav() {
   );
 }
 
-function HeroSection({ landing, stats }: { landing: LandingContent | null; stats: LandingStats | null; signature: SignatureService | null; }) {
+function HeroSection({ landing }: { landing: LandingContent | null; stats: LandingStats | null; signature: SignatureService | null; }) {
   return (
     <section className="hero">
       <div className="hero-left">

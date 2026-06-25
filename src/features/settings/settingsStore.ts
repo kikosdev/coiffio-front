@@ -47,7 +47,7 @@ interface SettingsStore {
   deleteRole: (id: string) => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsStore>((set, get) => ({
+export const useSettingsStore = create<SettingsStore>((set) => ({
   salon: null,
   roles: [],
   permissions: [],

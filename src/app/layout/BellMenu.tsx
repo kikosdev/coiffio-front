@@ -15,8 +15,6 @@ const TYPE_KEY: Record<string, string> = {
   'leave.requested': 'leaveRequested',
 };
 
-const APPOINTMENT_TYPES = new Set(['appointment.created', 'appointment.cancelled']);
-
 function notifDescription(type: string, payload: Record<string, unknown>): string | null {
   switch (type) {
     case 'order.created':

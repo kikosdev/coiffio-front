@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Modal } from '@/shared/ui';
 import { ApiError } from '@/shared/api/client';
-import { useTeamStore, type Staff, type StaffLevel } from './teamStore';
+import { useTeamStore, type Staff, type StaffLevel, type CreateStaffDto, type UpdateStaffDto } from './teamStore';
 import { useSettingsStore } from '@/features/settings/settingsStore';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -100,7 +100,7 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
   const onCreate = async (v: CreateValues) => {
     setFormError(null);
     try {
-      await createStaff({ ...v, ...(!['manager', 'owner', 'client'].includes(v.role) ? profile : {}) });
+      await createStaff({ ...v, ...(!['manager', 'owner', 'client'].includes(v.role) ? profile : {}) } as CreateStaffDto);
       createForm.reset();
       onClose();
     } catch (err) {
@@ -112,7 +112,7 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
     setFormError(null);
     try {
       const profilePart = !['manager', 'owner', 'client'].includes(staff.role) ? profile : {};
-      await updateStaff(staff.id, isOwner ? { name: v.name, phone: v.phone } : { ...v, ...profilePart });
+      await updateStaff(staff.id, (isOwner ? { name: v.name, phone: v.phone } : { ...v, ...profilePart }) as UpdateStaffDto);
       onClose();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Mise à jour impossible.');

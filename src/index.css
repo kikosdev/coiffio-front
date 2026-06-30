@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Ivory Éditorial — variables CSS (miroir des tokens Tailwind) ─── */
+:root {
+  --ink: #1c1612;
+  --ivory: #f3ece0;
+  --surface: #faf6ee;
+  --champagne: #b89968;
+  --champagne-deep: #9a7b4f;
+  --success: #3f8f6b;
+  --pending: #c9a227;
+  --error: #b4543e;
+  --muted: #8a8076;
+  --line: #e2d8c8;
+  --line-strong: #cfc3ae;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Chiffres en tabular pour alignement (prix, heures, codes) */
+.tabnums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accent serif éditorial doré */
+.serif-em {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  color: var(--champagne-deep);
+}

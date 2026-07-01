@@ -30,7 +30,7 @@ export function Register() {
   const onSubmit = async (values: FormValues) => {
     setFormError(null);
     try {
-      await registerUser(values);
+      await registerUser({ name: values.name, identifier: values.email, phone: values.phone, password: values.password });
       // Un nouveau compte est toujours un client → espace My Account.
       navigate('/my-account', { replace: true });
     } catch (err) {

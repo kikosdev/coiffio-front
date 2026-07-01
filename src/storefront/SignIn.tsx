@@ -36,7 +36,7 @@ export function SignIn() {
   const doSignIn = async () => {
     setBusy(true); setError(null);
     try {
-      const user = await login({ email: form.email, password: form.password });
+      const user = await login({ identifier: form.email, password: form.password });
       go(user.role);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Connexion impossible.');
@@ -49,7 +49,7 @@ export function SignIn() {
     try {
       const user = await register({
         name: `${form.firstName} ${form.lastName}`.trim(),
-        email: form.email, phone: form.phone, password: form.password,
+        identifier: form.email, phone: form.phone, password: form.password,
       });
       go(user.role);
     } catch (err) {
@@ -87,8 +87,8 @@ export function SignIn() {
             <p className="lead">Sign in to view your bookings, your saved formula, and your stored payment methods.</p>
             <div className="fields">
               <div className="fancy-field">
-                <label>Email</label>
-                <input type="email" placeholder="you@maison.paris" value={form.email} onChange={(e) => set('email', e.target.value)} autoFocus />
+                <label>Email or phone</label>
+                <input type="text" placeholder="you@maison.paris or +33 6 12 34 56" value={form.email} onChange={(e) => set('email', e.target.value)} autoFocus autoComplete="username" />
               </div>
               <div className="fancy-field">
                 <label>Password</label>
@@ -141,7 +141,7 @@ export function SignIn() {
             <h1>Owner <em>access</em>.</h1>
             <p className="lead">Sign in to manage appointments, stylists, revenue analytics, and all salon operations.</p>
             <div className="fields">
-              <div className="fancy-field"><label>Owner email</label><input type="email" placeholder="owner@salon.com" value={form.email} onChange={(e) => set('email', e.target.value)} autoFocus /></div>
+              <div className="fancy-field"><label>Owner email or phone</label><input type="text" placeholder="owner@salon.com or +33 6 xx xx xx" value={form.email} onChange={(e) => set('email', e.target.value)} autoFocus autoComplete="username" /></div>
               <div className="fancy-field">
                 <label>Password</label>
                 <div className="pwd-wrap">

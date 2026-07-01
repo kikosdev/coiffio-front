@@ -15,6 +15,7 @@ const TYPE_KEY: Record<string, string> = {
   'leave.requested': 'leaveRequested',
 };
 
+
 function notifDescription(type: string, payload: Record<string, unknown>): string | null {
   switch (type) {
     case 'order.created':

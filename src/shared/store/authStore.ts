@@ -9,12 +9,12 @@ import {
 type Status = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
 
 interface LoginInput {
-  email: string;
+  identifier: string;
   password: string;
 }
 interface RegisterInput {
   name: string;
-  email: string;
+  identifier: string;
   phone: string;
   password: string;
 }

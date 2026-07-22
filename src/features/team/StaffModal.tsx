@@ -35,6 +35,18 @@ type EditValues = z.infer<typeof editSchema>;
 const CAPS = ['men', 'women', 'universal'] as const;
 const CAP_LABEL: Record<string, string> = { men: 'Homme', women: 'Femme', universal: 'Universel' };
 
+const AVATAR_COLORS = [
+  '#B89968', // champagne (défaut)
+  '#A45C40', // terracotta
+  '#5B7065', // sauge
+  '#4B6584', // bleu poussière
+  '#6B4C6B', // prune
+  '#8C6E4A', // bronze
+  '#8A5B5B', // rose poussière
+  '#3F4B4A', // vert charbon
+];
+const DEFAULT_COLOR = AVATAR_COLORS[0];
+
 interface ProfileState {
   level: StaffLevel;
   capabilities: string[];
@@ -77,6 +89,7 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
   });
 
   const [profile, setProfile] = useState<ProfileState>({ level: 'senior', capabilities: [], baseRate: 0, commissionPct: 0 });
+  const [color, setColor] = useState(DEFAULT_COLOR);
 
   useEffect(() => {
     if (staff) {
@@ -86,8 +99,10 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
         baseRate: staff.baseRate ?? 0,
         commissionPct: staff.commissionPct ?? 0,
       });
+      setColor(staff.color ?? DEFAULT_COLOR);
     } else {
       setProfile({ level: 'senior', capabilities: [], baseRate: 0, commissionPct: 0 });
+      setColor(DEFAULT_COLOR);
     }
   }, [staff, open]);
 
@@ -100,7 +115,12 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
   const onCreate = async (v: CreateValues) => {
     setFormError(null);
     try {
-      await createStaff({ ...v, role: v.role as 'manager' | 'stylist' | 'colorist', ...(!['manager', 'owner', 'client'].includes(v.role) ? profile : {}) });
+      await createStaff({
+        ...v,
+        role: v.role as 'manager' | 'stylist' | 'colorist',
+        color,
+        ...(!['manager', 'owner', 'client'].includes(v.role) ? profile : {}),
+      });
       createForm.reset();
       onClose();
     } catch (err) {
@@ -112,7 +132,12 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
     setFormError(null);
     try {
       const profilePart = !['manager', 'owner', 'client'].includes(staff.role) ? profile : {};
-      await updateStaff(staff.id, isOwner ? { name: v.name, phone: v.phone } : { ...v, role: v.role as 'manager' | 'stylist' | 'colorist', ...profilePart });
+      await updateStaff(
+        staff.id,
+        isOwner
+          ? { name: v.name, phone: v.phone, color }
+          : { ...v, role: v.role as 'manager' | 'stylist' | 'colorist', color, ...profilePart },
+      );
       onClose();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Mise à jour impossible.');
@@ -174,6 +199,26 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
     </div>
   );
 
+  const ColorPicker = (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium uppercase tracking-wide text-muted">Couleur</label>
+      <div className="flex flex-wrap gap-2">
+        {AVATAR_COLORS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setColor(c)}
+            aria-label={c}
+            className={`h-7 w-7 rounded-full border-2 transition-transform ${
+              color === c ? 'scale-110 border-ink' : 'border-transparent hover:border-lineStrong'
+            }`}
+            style={{ backgroundColor: c }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <Modal
       open={open}
@@ -210,6 +255,7 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
             </div>
           )}
           {isOwner && <p className="text-xs text-muted">Le compte owner ne peut changer de rôle.</p>}
+          {ColorPicker}
           {showProfile && ProfileFields}
           {formError && <p className="text-sm text-error">{formError}</p>}
         </form>
@@ -239,6 +285,7 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
               {...createForm.register('password')}
             />
           </div>
+          {ColorPicker}
           {showProfile && ProfileFields}
           {formError && <p className="text-sm text-error">{formError}</p>}
         </form>

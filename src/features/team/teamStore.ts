@@ -67,6 +67,10 @@ export interface StylistStanding {
 
 export interface CreateStaffDto {
   name: string;
+  /** Identifiant de LOGIN du nouveau staff (email ou téléphone) — requis par le backend
+   *  (`CreateStaffAuthDto.identifier`). Distinct de `email`, qui n'est qu'un champ de contact :
+   *  l'omettre fait rejeter la création en 400 par class-validator. */
+  identifier: string;
   email: string;
   phone: string;
   role: 'manager' | 'stylist' | 'colorist';

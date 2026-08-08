@@ -117,6 +117,8 @@ export function StaffModal({ open, onClose, staff }: StaffModalProps) {
     try {
       await createStaff({
         ...v,
+        // Le backend attend `identifier` (login email OU téléphone) en plus de `email`.
+        identifier: v.email,
         role: v.role as 'manager' | 'stylist' | 'colorist',
         color,
         ...(!['manager', 'owner', 'client'].includes(v.role) ? profile : {}),

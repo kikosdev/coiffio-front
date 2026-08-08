@@ -31,7 +31,10 @@ function RequestForm() {
   const onSubmit = async (values: RequestValues) => {
     setFormError(null);
     try {
-      await api.post('/auth/password-reset/request', values);
+      // Backend PasswordResetRequestDto expects { identifier }, not { email } — sending the
+      // form's raw values silently posted an empty/missing `identifier` field, which
+      // class-validator rejected with "identifier must be a string / longer than 3 chars".
+      await api.post('/auth/password-reset/request', { identifier: values.email });
       setDone(true);
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Demande impossible.');

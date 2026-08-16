@@ -4,6 +4,11 @@ import type { CrudStore } from '@/shared/store/crud';
 
 export type ServiceGender = 'men' | 'women' | 'universal';
 
+export interface DoseConfigEntry {
+  productId: string;
+  doses: number;
+}
+
 export interface Service {
   _id: string;
   salonId: string;
@@ -15,6 +20,7 @@ export interface Service {
   bufferMin: number;
   color: string;
   active: boolean;
+  doseConfig?: DoseConfigEntry[];
 }
 
 export interface ServiceDto {
@@ -27,7 +33,9 @@ export interface ServiceDto {
   color?: string;
 }
 
-interface ServiceStore extends CrudStore<Service, ServiceDto, Partial<ServiceDto>> {}
+interface ServiceStore extends CrudStore<Service, ServiceDto, Partial<ServiceDto>> {
+  updateDoseConfig: (id: string, doseConfig: DoseConfigEntry[]) => Promise<void>;
+}
 
 /** CrudStore services (Sprint 2) — soft delete via remove() (active:false côté API). */
 export const useServiceStore = create<ServiceStore>((set, get) => ({
@@ -74,5 +82,11 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
       set({ items: prev });
       throw err;
     }
+  },
+
+  // Endpoint séparé de update() — owner-only côté backend (LC-2/LC-T8).
+  updateDoseConfig: async (id, doseConfig) => {
+    const saved = await api.patch<Service>(`/services/${id}/dose-config`, { doseConfig });
+    set((s) => ({ items: s.items.map((x) => (x._id === id ? saved : x)) }));
   },
 }));

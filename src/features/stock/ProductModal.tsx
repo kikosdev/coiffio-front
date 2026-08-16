@@ -25,12 +25,14 @@ interface Empty {
   name: string; category: string; supplier: string;
   price: string; cost: string; stock: string; lowStockAt: string;
   barcode: string; notes: string;
+  isConsumable: boolean; dosesPerUnit: string; varianceThresholdPct: string;
 }
 
 const DEFAULTS: Empty = {
   name: '', category: 'Shampoo', supplier: '',
   price: '', cost: '', stock: '10', lowStockAt: '3',
   barcode: '', notes: '',
+  isConsumable: false, dosesPerUnit: '', varianceThresholdPct: '',
 };
 
 interface ProductModalProps { open: boolean; onClose: () => void; product?: Product | null; }
@@ -39,6 +41,7 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
   const formatMoney = useMoneyFormatter();
   const create = useStockStore((s) => s.create);
   const update = useStockStore((s) => s.update);
+  const updateDoses = useStockStore((s) => s.updateDoses);
   const isEdit = !!product;
 
   const [form, setForm] = useState<Empty>(DEFAULTS);
@@ -57,6 +60,9 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
         lowStockAt: String(product.lowStockAt),
         barcode: product.barcode || '',
         notes: product.notes || '',
+        isConsumable: !!product.isConsumable,
+        dosesPerUnit: product.dosesPerUnit != null ? String(product.dosesPerUnit) : '',
+        varianceThresholdPct: product.varianceThresholdPct != null ? String(product.varianceThresholdPct) : '',
       });
     } else {
       setForm(DEFAULTS);
@@ -75,6 +81,23 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
     if (isNaN(price) || price < 0) { setError('Prix de vente invalide.'); return; }
     if (isNaN(cost) || cost < 0) { setError("Coût d'achat invalide."); return; }
 
+    let dosesPerUnit: number | undefined;
+    if (form.isConsumable) {
+      dosesPerUnit = Number(form.dosesPerUnit);
+      if (!form.dosesPerUnit.trim() || isNaN(dosesPerUnit) || dosesPerUnit <= 0) {
+        setError('Le nombre de doses par unité est requis pour un produit consommable.');
+        return;
+      }
+    }
+    let varianceThresholdPct: number | undefined;
+    if (form.varianceThresholdPct.trim()) {
+      varianceThresholdPct = Number(form.varianceThresholdPct);
+      if (isNaN(varianceThresholdPct) || varianceThresholdPct < 0) {
+        setError('Seuil de variance invalide.');
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -89,11 +112,18 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
         barcode: form.barcode.trim(),
         notes: form.notes.trim(),
       };
+      let savedId: string;
       if (isEdit && product) {
         const { stock: _s, ...updatePayload } = payload;
         await update(product._id, updatePayload);
+        savedId = product._id;
       } else {
-        await create(payload);
+        const saved = await create(payload);
+        savedId = saved._id;
+      }
+      // Endpoint séparé — ne touche que la config de contrôle des pertes.
+      if (form.isConsumable || (isEdit && product?.isConsumable)) {
+        await updateDoses(savedId, { isConsumable: form.isConsumable, dosesPerUnit, varianceThresholdPct });
       }
       onClose();
     } catch (err) {
@@ -223,6 +253,57 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
             placeholder="Usage professionnel ou revente…"
             className="w-full rounded-xl border border-lineStrong bg-surface px-3 py-2 text-sm text-ink outline-none placeholder:text-muted focus:border-champagne focus:ring-2 focus:ring-champagne/30 resize-none"
           />
+        </div>
+
+        {/* Contrôle des pertes */}
+        <div className="flex flex-col gap-3 rounded-xl border border-line bg-ivory/50 px-4 py-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-ink">Contrôle des pertes</p>
+              <p className="text-xs text-muted mt-0.5">Produit consommé pendant les services (coloration, soin…)</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.isConsumable}
+              onClick={() => setForm((f) => ({ ...f, isConsumable: !f.isConsumable }))}
+              className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${form.isConsumable ? 'bg-champagne' : 'bg-lineStrong'}`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-transform ${form.isConsumable ? 'translate-x-5' : 'translate-x-0.5'}`}
+              />
+            </button>
+          </div>
+
+          {form.isConsumable && (
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className={LBL}>
+                <label className={LABEL_TEXT}>DOSES PAR UNITÉ *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={form.dosesPerUnit}
+                  onChange={set('dosesPerUnit')}
+                  placeholder="Ex. 20"
+                  className="h-10 w-full rounded-xl border border-lineStrong bg-surface px-3 text-sm text-ink outline-none placeholder:text-muted focus:border-champagne focus:ring-2 focus:ring-champagne/30"
+                />
+                <p className="text-[11px] text-muted">1 unité = N doses</p>
+              </div>
+              <div className={LBL}>
+                <label className={LABEL_TEXT}>SEUIL D'ALERTE SPÉCIFIQUE (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={form.varianceThresholdPct}
+                  onChange={set('varianceThresholdPct')}
+                  placeholder="Valeur globale du salon si vide"
+                  className="h-10 w-full rounded-xl border border-lineStrong bg-surface px-3 text-sm text-ink outline-none placeholder:text-muted focus:border-champagne focus:ring-2 focus:ring-champagne/30"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {error && <p className="text-sm font-medium text-error">{error}</p>}

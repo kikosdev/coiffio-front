@@ -8,6 +8,13 @@ export interface BusinessHour {
   end: string;
 }
 
+export interface LossControl {
+  varianceThresholdPct: number;
+  extremeUsageFactor: number;
+  productCommissionPct: number;
+  alertsEnabled: boolean;
+}
+
 export interface SalonConfig {
   _id: string;
   name: string;
@@ -18,6 +25,7 @@ export interface SalonConfig {
   currency: string;
   taxRate: number;
   businessHours: BusinessHour[];
+  lossControl?: LossControl;
 }
 
 export interface SalonRole {
@@ -36,10 +44,12 @@ interface SettingsStore {
   permissions: Permission[];
   loading: boolean;
   saving: boolean;
+  savingLossControl: boolean;
   error: string | null;
 
   fetchSalon: () => Promise<void>;
   updateSalon: (data: Partial<SalonConfig>) => Promise<void>;
+  updateLossControl: (data: Partial<LossControl>) => Promise<void>;
   fetchRoles: () => Promise<void>;
   fetchPermissions: () => Promise<void>;
   createRole: (data: { name: string; permissions: string[]; color?: string }) => Promise<void>;
@@ -53,6 +63,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   permissions: [],
   loading: false,
   saving: false,
+  savingLossControl: false,
   error: null,
 
   fetchSalon: async () => {
@@ -72,6 +83,19 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       set({ salon, saving: false });
     } catch (err) {
       set({ saving: false, error: err instanceof ApiError ? err.message : 'Erreur' });
+      throw err;
+    }
+  },
+
+  // Endpoint séparé de updateSalon() — backend merge champ par champ (load→mutate→save),
+  // jamais un $set brut : aucun autre champ Salon ne peut être écrasé par cet appel.
+  updateLossControl: async (data) => {
+    set({ savingLossControl: true, error: null });
+    try {
+      const salon = await api.patch<SalonConfig>('/settings/loss-control', data);
+      set({ salon, savingLossControl: false });
+    } catch (err) {
+      set({ savingLossControl: false, error: err instanceof ApiError ? err.message : 'Erreur' });
       throw err;
     }
   },

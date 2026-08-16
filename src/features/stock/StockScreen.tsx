@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Plus, Search, Box, Truck, ChevronRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { Button, EmptyState } from '@/shared/ui';
+import { Badge, Button, EmptyState } from '@/shared/ui';
 import { useStockStore, type Product } from './stockStore';
 import { ProductModal } from './ProductModal';
 import { RestockSheet } from './RestockSheet';
@@ -114,12 +114,15 @@ function ProduitsTab() {
                   <Box size={16} className="flex-shrink-0 text-muted" />
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">
-                      {p.name}
+                    <p className="text-sm font-medium text-ink truncate flex items-center gap-1.5">
+                      <span className="truncate">{p.name}</span>
                       {p.promo && p.promoPercent > 0 && (
-                        <span className="ml-1.5 rounded-full bg-champagne/20 px-1.5 py-0.5 text-[10px] font-medium text-champagne">
+                        <span className="flex-shrink-0 rounded-full bg-champagne/20 px-1.5 py-0.5 text-[10px] font-medium text-champagne">
                           -{p.promoPercent}%{p.promoLabel ? ` · ${p.promoLabel}` : ''}
                         </span>
+                      )}
+                      {p.isConsumable && (
+                        <Badge tone="champagne" className="flex-shrink-0">Consommable</Badge>
                       )}
                     </p>
                     <p className="text-xs text-muted truncate">{p.category} · Prix : {p.price} TND</p>

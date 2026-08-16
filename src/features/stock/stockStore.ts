@@ -17,6 +17,15 @@ export interface Product {
   promoPercent: number;
   promoLabel: string;
   active: boolean;
+  dosesPerUnit?: number;
+  isConsumable?: boolean;
+  varianceThresholdPct?: number;
+}
+
+export interface DosesDto {
+  isConsumable: boolean;
+  dosesPerUnit?: number;
+  varianceThresholdPct?: number;
 }
 
 export interface StockMove {
@@ -43,6 +52,7 @@ export interface ProductDto {
 interface StockStore {
   items: Product[];
   movements: StockMove[];
+  consumableProducts: Product[];
   loading: boolean;
   error: string | null;
   fetch: () => Promise<void>;
@@ -52,11 +62,14 @@ interface StockStore {
   restock: (id: string, qty: number, note?: string) => Promise<void>;
   adjustStock: (id: string, delta: number) => Promise<void>;
   fetchMovements: (productId?: string) => Promise<void>;
+  updateDoses: (id: string, dto: DosesDto) => Promise<void>;
+  fetchConsumableProducts: () => Promise<void>;
 }
 
 export const useStockStore = create<StockStore>((set) => ({
   items: [],
   movements: [],
+  consumableProducts: [],
   loading: false,
   error: null,
 
@@ -99,5 +112,15 @@ export const useStockStore = create<StockStore>((set) => ({
   fetchMovements: async (productId) => {
     const movements = await api.get<StockMove[]>('/stock/movements', productId ? { productId } : undefined);
     set({ movements });
+  },
+
+  updateDoses: async (id, dto) => {
+    const saved = await api.patch<Product>(`/products/${id}/doses`, dto);
+    set((s) => ({ items: s.items.map((p) => (p._id === id ? saved : p)) }));
+  },
+
+  fetchConsumableProducts: async () => {
+    const consumableProducts = await api.get<Product[]>('/products', { isConsumable: 'true', activeOnly: 'true' });
+    set({ consumableProducts });
   },
 }));

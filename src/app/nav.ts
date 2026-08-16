@@ -17,6 +17,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { to: '/services', label: 'nav.services', icon: 'Sparkles' },
   { to: '/caisse', label: 'nav.financePos', icon: 'Wallet' },
   { to: '/boutique', label: 'nav.stock', icon: 'Package' },
+  { to: '/loss-control', label: 'nav.lossControl', icon: 'ShieldAlert' },
   { to: '/ventes', label: 'nav.sales', icon: 'Receipt' },
   { to: '/orders', label: 'nav.orders', icon: 'ShoppingBag' },
   { to: '/settings', label: 'nav.settings', icon: 'Settings' },

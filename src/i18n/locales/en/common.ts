@@ -25,6 +25,7 @@ export default {
     financePos: 'Finance & POS',
     checkout: 'Checkout',
     stock: 'Stock',
+    lossControl: 'Loss Control',
     sales: 'Sales',
     orders: 'Orders',
     settings: 'Settings',

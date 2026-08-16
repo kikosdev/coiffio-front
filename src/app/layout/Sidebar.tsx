@@ -6,14 +6,20 @@ import { Icon } from '@/shared/ui';
 import { PRIMARY_NAV } from '@/app/nav';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotifStore } from '@/shared/store/notifStore';
+import { useLossControlStore } from '@/features/loss-control/lossControlStore';
 
 export function Sidebar() {
   const { t } = useTranslation('common');
   const [collapsed, setCollapsed] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   const notifs = useNotifStore((s) => s.items);
+  const lossAlerts = useLossControlStore((s) => s.alerts);
 
   const badgeFor = (to: string): number => {
+    // Alertes loss-control : source distincte (LossAlert, pas Notification) — owner-only,
+    // peuplée par Shell.tsx au montage, jamais par le socket temps réel générique.
+    if (to === '/loss-control') return lossAlerts.length;
+
     const map: Record<string, string[]> = {
       '/schedule': ['appointment.created', 'appointment.cancelled'],
       '/boutique': ['order.created', 'stock.low'],

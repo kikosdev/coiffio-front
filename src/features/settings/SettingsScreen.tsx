@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Check, Plus, Pencil, Trash2, Shield, ShieldCheck, KeyRound, Crown, MapPin, Clock, Phone, Bell, Laptop, Smartphone, Tablet, LogOut, UserRound, Store, Eye, EyeOff } from 'lucide-react';
+import { Check, Plus, Pencil, Trash2, Shield, ShieldCheck, KeyRound, Crown, MapPin, Clock, Phone, Bell, Laptop, Smartphone, Tablet, LogOut, UserRound, Store, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Card, CardBody, CardHeader, CardTitle, Button, Input, Modal } from '@/shared/ui';
 import { useSettingsStore, type SalonRole, type BusinessHour } from './settingsStore';
 import { useAuthStore } from '@/shared/store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useServiceStore } from '@/features/services/serviceStore';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api, { ApiError } from '@/shared/api/client';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -198,6 +199,161 @@ function SalonTab() {
 
       <div className="flex justify-end">
         <Button onClick={handleSave} loading={saving} leftIcon={saved ? <Check size={15} /> : undefined}>
+          {saved ? 'Enregistré !' : 'Enregistrer'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Loss control tab ─────────────────────────────────────────────────────────
+
+interface LossControlForm {
+  varianceThresholdPct: number;
+  extremeUsageFactor: number;
+  productCommissionPct: number;
+  alertsEnabled: boolean;
+}
+
+const LOSS_CONTROL_DEFAULTS: LossControlForm = {
+  varianceThresholdPct: 15,
+  extremeUsageFactor: 2,
+  productCommissionPct: 0,
+  alertsEnabled: false,
+};
+
+function LossControlTab() {
+  const salon = useSettingsStore((s) => s.salon);
+  const savingLossControl = useSettingsStore((s) => s.savingLossControl);
+  const updateLossControl = useSettingsStore((s) => s.updateLossControl);
+  const services = useServiceStore((s) => s.items);
+  const fetchServices = useServiceStore((s) => s.fetch);
+
+  const [form, setForm] = useState<LossControlForm>(LOSS_CONTROL_DEFAULTS);
+  const [errors, setErrors] = useState<Partial<Record<keyof LossControlForm, string>>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { void fetchServices(); }, [fetchServices]);
+
+  useEffect(() => {
+    if (!salon) return;
+    setForm({
+      varianceThresholdPct: salon.lossControl?.varianceThresholdPct ?? LOSS_CONTROL_DEFAULTS.varianceThresholdPct,
+      extremeUsageFactor: salon.lossControl?.extremeUsageFactor ?? LOSS_CONTROL_DEFAULTS.extremeUsageFactor,
+      productCommissionPct: salon.lossControl?.productCommissionPct ?? LOSS_CONTROL_DEFAULTS.productCommissionPct,
+      alertsEnabled: salon.lossControl?.alertsEnabled ?? LOSS_CONTROL_DEFAULTS.alertsEnabled,
+    });
+  }, [salon]);
+
+  const configuredServicesCount = services.filter((s) => (s.doseConfig?.length ?? 0) > 0).length;
+  const showActivationWarning = form.alertsEnabled && configuredServicesCount === 0;
+
+  const validate = (): boolean => {
+    const next: Partial<Record<keyof LossControlForm, string>> = {};
+    if (form.varianceThresholdPct < 0 || form.varianceThresholdPct > 100) {
+      next.varianceThresholdPct = 'Doit être entre 0 et 100.';
+    }
+    if (form.extremeUsageFactor < 1) {
+      next.extremeUsageFactor = 'Doit être supérieur ou égal à 1.';
+    }
+    if (form.productCommissionPct < 0 || form.productCommissionPct > 100) {
+      next.productCommissionPct = 'Doit être entre 0 et 100.';
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSave = async () => {
+    setSaveError(null);
+    if (!validate()) return;
+    try {
+      await updateLossControl(form);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setSaveError(err instanceof ApiError ? err.message : 'Enregistrement impossible.');
+    }
+  };
+
+  if (!salon) return <p className="py-10 text-center text-sm text-muted">Chargement…</p>;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader><CardTitle>Contrôle des pertes</CardTitle></CardHeader>
+        <CardBody className="space-y-5">
+          {/* Interrupteur maître */}
+          <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-ivory/50 px-4 py-3.5">
+            <div className="flex flex-col gap-1 pr-4">
+              <span className="text-sm font-medium text-ink">Détection des écarts</span>
+              <span className="max-w-md text-xs text-muted">
+                Active la détection des écarts. Le staff devra déclarer les doses utilisées avant de
+                pouvoir encaisser un service consommant des produits.
+              </span>
+            </div>
+            <Toggle
+              checked={form.alertsEnabled}
+              onChange={(v) => setForm((f) => ({ ...f, alertsEnabled: v }))}
+            />
+          </div>
+
+          {showActivationWarning && (
+            <div className="flex items-start gap-2 rounded-xl bg-pending/10 px-4 py-3">
+              <AlertTriangle size={15} className="mt-0.5 flex-shrink-0 text-pending" />
+              <p className="text-xs text-pending">
+                Aucun service n'a de produits configurés — la détection ne remontera aucun écart.
+                Configurez d'abord des produits consommés dans <strong>Services</strong>.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted">Seuil d'écart global (%)</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={form.varianceThresholdPct}
+                onChange={(e) => setForm((f) => ({ ...f, varianceThresholdPct: Number(e.target.value) }))}
+                className="h-10 w-full rounded-xl border border-lineStrong bg-surface px-3 text-sm text-ink outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/30"
+              />
+              {errors.varianceThresholdPct && <span className="text-xs text-error">{errors.varianceThresholdPct}</span>}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted">Facteur d'usage extrême (×)</label>
+              <input
+                type="number"
+                min={1}
+                step="0.1"
+                value={form.extremeUsageFactor}
+                onChange={(e) => setForm((f) => ({ ...f, extremeUsageFactor: Number(e.target.value) }))}
+                className="h-10 w-full rounded-xl border border-lineStrong bg-surface px-3 text-sm text-ink outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/30"
+              />
+              <span className="text-[11px] text-muted">Alerte si un rendez-vous consomme plus de N fois la dose attendue.</span>
+              {errors.extremeUsageFactor && <span className="text-xs text-error">{errors.extremeUsageFactor}</span>}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted">Commission vente produit (%)</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={form.productCommissionPct}
+                onChange={(e) => setForm((f) => ({ ...f, productCommissionPct: Number(e.target.value) }))}
+                className="h-10 w-full rounded-xl border border-lineStrong bg-surface px-3 text-sm text-ink outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/30"
+              />
+              {errors.productCommissionPct && <span className="text-xs text-error">{errors.productCommissionPct}</span>}
+            </div>
+          </div>
+
+          {saveError && <p className="text-sm text-error">{saveError}</p>}
+        </CardBody>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button onClick={handleSave} loading={savingLossControl} leftIcon={saved ? <Check size={15} /> : undefined}>
           {saved ? 'Enregistré !' : 'Enregistrer'}
         </Button>
       </div>
@@ -863,11 +1019,12 @@ function AccountTab() {
 
 // ── Tab bar ───────────────────────────────────────────────────────────────────
 
-type Tab = 'salon' | 'roles' | 'account';
+type Tab = 'salon' | 'lossControl' | 'roles' | 'account';
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'salon', label: 'Salon' },
+    { id: 'lossControl', label: 'Contrôle des pertes' },
     { id: 'roles', label: 'Rôles & Permissions' },
     { id: 'account', label: 'Mon Compte' },
   ];
@@ -892,8 +1049,13 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 
+const VALID_TABS: Tab[] = ['salon', 'lossControl', 'roles', 'account'];
+
 export function SettingsScreen() {
-  const [tab, setTab] = useState<Tab>('salon');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab = (VALID_TABS as string[]).includes(tabParam ?? '') ? (tabParam as Tab) : 'salon';
+  const [tab, setTab] = useState<Tab>(initialTab);
   const fetchSalon = useSettingsStore((s) => s.fetchSalon);
   const fetchRoles = useSettingsStore((s) => s.fetchRoles);
   const fetchPermissions = useSettingsStore((s) => s.fetchPermissions);
@@ -908,6 +1070,7 @@ export function SettingsScreen() {
     <div className="mx-auto max-w-11xl">
       <TabBar active={tab} onChange={setTab} />
       {tab === 'salon' && <SalonTab />}
+      {tab === 'lossControl' && <LossControlTab />}
       {tab === 'roles' && <RolesTab />}
       {tab === 'account' && <AccountTab />}
     </div>

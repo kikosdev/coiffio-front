@@ -25,6 +25,7 @@ export default {
     financePos: 'المالية والصندوق',
     checkout: 'الصندوق',
     stock: 'المخزون',
+    lossControl: 'مراقبة الفاقد',
     sales: 'المبيعات',
     orders: 'الطلبات',
     settings: 'الإعدادات',

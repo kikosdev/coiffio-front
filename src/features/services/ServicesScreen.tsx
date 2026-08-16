@@ -106,11 +106,16 @@ export function ServicesScreen() {
                           <span className="shrink-0 font-serif text-lg text-ink tabnums">{s.price} TND</span>
                         </div>
                         {s.category && <p className="text-xs text-muted">{s.category}</p>}
-                        <div className="mt-2 flex items-center gap-2">
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
                           <Badge tone="champagne">
                             <Clock size={11} /> {s.durationMin} min
                           </Badge>
                           {s.bufferMin > 0 && <Badge tone="neutral">+{s.bufferMin} tampon</Badge>}
+                          {(s.doseConfig?.length ?? 0) > 0 && (
+                            <Badge tone="champagne">
+                              {s.doseConfig!.length} produit{s.doseConfig!.length > 1 ? 's' : ''}
+                            </Badge>
+                          )}
                         </div>
                         <div className="mt-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                           <Button variant="ghost" size="sm" leftIcon={<Pencil size={14} />} onClick={() => openEdit(s)}>

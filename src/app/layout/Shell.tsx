@@ -7,6 +7,7 @@ import { Topbar } from './Topbar';
 import { ALL_NAV } from '@/app/nav';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotifStore } from '@/shared/store/notifStore';
+import { useLossControlStore } from '@/features/loss-control/lossControlStore';
 import { AppointmentDetailsModal } from '@/features/schedule/AppointmentDetailsModal';
 
 /** Assemble Sidebar (desktop) + Topbar + MobileNav (mobile) + <Outlet/>. */
@@ -19,12 +20,19 @@ export function Shell() {
 
   // Au montage du backoffice : connexion socket (rooms jointes côté serveur) + notifications.
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const initNotifs = useNotifStore((s) => s.init);
   const teardown = useNotifStore((s) => s.teardown);
   useEffect(() => {
     if (token) initNotifs(token);
     return () => teardown();
   }, [token, initNotifs, teardown]);
+
+  // Alertes loss-control : owner-only côté backend (403 sinon) — jamais appelé pour les autres rôles.
+  const fetchLossAlerts = useLossControlStore((s) => s.fetchAlerts);
+  useEffect(() => {
+    if (user?.role === 'owner') void fetchLossAlerts();
+  }, [user?.role, fetchLossAlerts]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-ivory">

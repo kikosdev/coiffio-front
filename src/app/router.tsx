@@ -14,6 +14,7 @@ import { ScheduleScreen } from '@/features/schedule/ScheduleScreen';
 import { CaisseScreen } from '@/features/finance/CaisseScreen';
 import { OverviewScreen } from '@/features/overview/OverviewScreen';
 import { StockScreen } from '@/features/stock/StockScreen';
+import { LossControlScreen } from '@/features/loss-control/LossControlScreen';
 import { OrdersQueue } from '@/features/orders/OrdersQueue';
 import { VentesPage } from '@/features/ventes/VentesPage';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
@@ -90,6 +91,7 @@ export const router = createBrowserRouter([
       { path: 'schedule', element: <ScheduleScreen /> },
       { path: 'caisse', element: <CaisseScreen /> },
       { path: 'boutique', element: <StockScreen /> },
+      { path: 'loss-control', element: <LossControlScreen /> },
       { path: 'ventes', element: <VentesPage /> },
       { path: 'orders', element: <OrdersQueue /> },
       { path: 'clients', element: <ClientsList /> },

@@ -15,6 +15,10 @@
   --muted: #8a8076;
   --line: #e2d8c8;
   --line-strong: #cfc3ae;
+  /* Gris neutre dédié pour l'état OFF des switches (LC-1, ProductModal) — délibérément PAS
+     --line/--line-strong (trop proches de --champagne en teinte) : un switch éteint ne doit
+     jamais se lire comme "activé mais désactivé". */
+  --switch-off: #d8cfc2;
 }
 
 * {

@@ -3,6 +3,7 @@ import { Button, Modal } from '@/shared/ui';
 import { ApiError } from '@/shared/api/client';
 import { useStockStore, type Product } from './stockStore';
 import { useMoneyFormatter } from '@/utils/money';
+import './stock.css';
 
 const CATEGORIES = ['Shampoo', 'Conditioner', 'Treatment', 'Styling', 'Coloration', 'Soin', 'Autre'];
 
@@ -266,12 +267,12 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
               type="button"
               role="switch"
               aria-checked={form.isConsumable}
+              aria-label="Contrôle des pertes"
+              disabled={submitting}
               onClick={() => setForm((f) => ({ ...f, isConsumable: !f.isConsumable }))}
-              className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${form.isConsumable ? 'bg-champagne' : 'bg-lineStrong'}`}
+              className={`stk-switch ${form.isConsumable ? 'is-on' : 'is-off'}`}
             >
-              <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-transform ${form.isConsumable ? 'translate-x-5' : 'translate-x-0.5'}`}
-              />
+              <span className="stk-switch-knob" />
             </button>
           </div>
 

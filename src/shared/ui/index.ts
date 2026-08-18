@@ -4,6 +4,7 @@ export { Card, CardHeader, CardTitle, CardBody } from './Card';
 export { Badge } from './Badge';
 export { Avatar } from './Avatar';
 export { Modal, Sheet } from './Modal';
+export { Switch } from './Switch';
 export { Icon, type IconName } from './Icon';
 export { Skeleton, SkeletonCard, SkeletonRow, SkeletonList } from './Skeleton';
 export { EmptyState } from './EmptyState';

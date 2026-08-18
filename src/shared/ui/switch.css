@@ -1,13 +1,13 @@
-/* Salon Haire — Stock feature styles */
+/* Salon Haire — shared UI: Switch */
 
-/* ─── Switch "Contrôle des pertes" (ProductModal) ───
+/* ─── 3-state switch (Switch.tsx) ───
    3 signaux non ambigus, jamais mélangés :
      OFF      → knob collé à inline-start, track gris neutre (--switch-off, JAMAIS l'ambre)
      ON       → knob collé à inline-end, track champagne plein
-     disabled → opacité réduite, UNIQUEMENT pendant la sauvegarde (pas un état permanent)
-   Un OFF qui partage le vocabulaire visuel du disabled se lit comme "activé mais bloqué" —
-   c'est le bug que ce fichier corrige. Propriétés logiques uniquement (RTL-safe). */
-.stk-switch {
+     disabled → opacité réduite, UNIQUEMENT pendant une sauvegarde en cours (pas un état
+                permanent) — un OFF qui partage le vocabulaire visuel du disabled se lit
+                comme "activé mais bloqué". Propriétés logiques uniquement (RTL-safe). */
+.ui-switch {
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
@@ -21,32 +21,32 @@
   transition: background-color .18s ease, border-color .18s ease;
 }
 
-.stk-switch.is-off {
+.ui-switch.is-off {
   background: var(--switch-off);
 }
 
-.stk-switch.is-on {
+.ui-switch.is-on {
   background: var(--champagne);
 }
 
-/* Uniquement pendant la sauvegarde (disabled={submitting}) — jamais un état permanent. */
-.stk-switch:disabled {
+/* Uniquement pendant une sauvegarde en cours (disabled={saving}) — jamais un état permanent. */
+.ui-switch:disabled {
   opacity: .6;
   cursor: not-allowed;
 }
 
-.stk-switch-knob {
+.ui-switch-knob {
   position: absolute;
   inset-block-start: 3px;
   inset-inline-start: 2px;
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 1px 2px rgba(28, 22, 18, 0.25);
   transition: inset-inline-start .18s ease;
 }
 
-.stk-switch.is-on .stk-switch-knob {
+.ui-switch.is-on .ui-switch-knob {
   inset-inline-start: calc(100% - 20px);
 }

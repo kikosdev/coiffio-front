@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal } from '@/shared/ui';
+import { Button, Modal, Switch } from '@/shared/ui';
 import { ApiError } from '@/shared/api/client';
 import { useStockStore, type Product } from './stockStore';
 import { useMoneyFormatter } from '@/utils/money';
-import './stock.css';
 
 const CATEGORIES = ['Shampoo', 'Conditioner', 'Treatment', 'Styling', 'Coloration', 'Soin', 'Autre'];
 
@@ -263,17 +262,12 @@ export function ProductModal({ open, onClose, product }: ProductModalProps) {
               <p className="text-sm font-medium text-ink">Contrôle des pertes</p>
               <p className="text-xs text-muted mt-0.5">Produit consommé pendant les services (coloration, soin…)</p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={form.isConsumable}
-              aria-label="Contrôle des pertes"
+            <Switch
+              checked={form.isConsumable}
+              onChange={(v) => setForm((f) => ({ ...f, isConsumable: v }))}
               disabled={submitting}
-              onClick={() => setForm((f) => ({ ...f, isConsumable: !f.isConsumable }))}
-              className={`stk-switch ${form.isConsumable ? 'is-on' : 'is-off'}`}
-            >
-              <span className="stk-switch-knob" />
-            </button>
+              ariaLabel="Contrôle des pertes"
+            />
           </div>
 
           {form.isConsumable && (

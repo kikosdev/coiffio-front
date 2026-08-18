@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input, Modal } from '@/shared/ui';
+import { Button, Input, Modal, Switch } from '@/shared/ui';
 import { ApiError } from '@/shared/api/client';
 import { useClientStore, type Client } from './clientStore';
 
@@ -32,6 +32,7 @@ export function ClientModal({ open, onClose, client }: ClientModalProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -88,10 +89,16 @@ export function ClientModal({ open, onClose, client }: ClientModalProps) {
               <option value="sms">SMS</option>
             </select>
           </div>
-          <label className="mt-6 flex items-center gap-2 text-sm text-ink">
-            <input type="checkbox" className="h-4 w-4 accent-[#B89968]" {...register('commsConsent')} />
-            Consentement comms
-          </label>
+          <div className="mt-6 flex items-center gap-2">
+            <Controller
+              name="commsConsent"
+              control={control}
+              render={({ field }) => (
+                <Switch checked={field.value} onChange={field.onChange} ariaLabel="Consentement communications" />
+              )}
+            />
+            <span className="text-sm text-ink">Consentement comms</span>
+          </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium uppercase tracking-wide text-muted">Notes</label>

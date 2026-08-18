@@ -1,22 +1,8 @@
 import { Eye, Tag } from 'lucide-react';
+import { Switch } from '@/shared/ui';
 import type { Product } from './stockStore';
 
 const PROMO_LABELS = ['SOLDES', 'NOUVEAUTÉ', 'EXCLUSIF', 'OFFRE LIMITÉE', 'BEST-SELLER'];
-
-function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!on)}
-      aria-pressed={on}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-champagne ${on ? 'bg-champagne' : 'bg-lineStrong'}`}
-    >
-      <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out mt-0.5 ${on ? 'translate-x-5' : 'translate-x-0.5'}`}
-      />
-    </button>
-  );
-}
 
 function margin(price: number, cost: number): string {
   if (!cost || !price) return '—';
@@ -124,7 +110,11 @@ export function ProduitDetail({ product, onEdit, onDelete, onRestock, onUpdate }
                   : 'Masqué — non visible par les clients.'}
               </p>
             </div>
-            <Toggle on={product.visibleLanding} onChange={(v) => onUpdate({ visibleLanding: v })} />
+            <Switch
+              checked={product.visibleLanding}
+              onChange={(v) => onUpdate({ visibleLanding: v })}
+              ariaLabel="Afficher sur la page d'accueil"
+            />
           </div>
         </div>
 
@@ -143,7 +133,11 @@ export function ProduitDetail({ product, onEdit, onDelete, onRestock, onUpdate }
                   : 'Aucune remise active.'}
               </p>
             </div>
-            <Toggle on={product.promo} onChange={(v) => onUpdate({ promo: v })} />
+            <Switch
+              checked={product.promo}
+              onChange={(v) => onUpdate({ promo: v })}
+              ariaLabel="Activer une promotion"
+            />
           </div>
 
           {product.promo && (

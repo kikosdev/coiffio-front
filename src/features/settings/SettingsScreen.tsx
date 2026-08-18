@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Plus, Pencil, Trash2, Shield, ShieldCheck, KeyRound, Crown, MapPin, Clock, Phone, Bell, Laptop, Smartphone, Tablet, LogOut, UserRound, Store, Eye, EyeOff, AlertTriangle } from 'lucide-react';
-import { Card, CardBody, CardHeader, CardTitle, Button, Input, Modal } from '@/shared/ui';
+import { Card, CardBody, CardHeader, CardTitle, Button, Input, Modal, Switch } from '@/shared/ui';
 import { useSettingsStore, type SalonRole, type BusinessHour } from './settingsStore';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useServiceStore } from '@/features/services/serviceStore';
@@ -46,26 +46,6 @@ const PERMISSION_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS = ['#1C1612', '#9A7B4F', '#B89968', '#3F8F6B', '#C9A227', '#B4543E', '#8A8076'];
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-        checked ? 'bg-champagne-deep' : 'bg-line'
-      }`}
-    >
-      <span
-        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-[18px]' : 'translate-x-1'
-        }`}
-      />
-    </button>
-  );
-}
 
 // ── Salon tab ─────────────────────────────────────────────────────────────────
 
@@ -168,7 +148,11 @@ function SalonTab() {
           <div className="divide-y divide-line">
             {hours.map((h) => (
               <div key={h.day} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                <Toggle checked={h.isOpen} onChange={(v) => patchHour(h.day, 'isOpen', v)} />
+                <Switch
+                  checked={h.isOpen}
+                  onChange={(v) => patchHour(h.day, 'isOpen', v)}
+                  ariaLabel={`Ouvert le ${DAY_NAMES[h.day]}`}
+                />
                 <span className={`w-24 shrink-0 text-sm font-medium ${h.isOpen ? 'text-ink' : 'text-muted'}`}>
                   {DAY_NAMES[h.day]}
                 </span>
@@ -292,9 +276,10 @@ function LossControlTab() {
                 pouvoir encaisser un service consommant des produits.
               </span>
             </div>
-            <Toggle
+            <Switch
               checked={form.alertsEnabled}
               onChange={(v) => setForm((f) => ({ ...f, alertsEnabled: v }))}
+              ariaLabel="Détection des écarts"
             />
           </div>
 
@@ -610,26 +595,6 @@ function RolesTab() {
 
 // ── Account tab helpers ────────────────────────────────────────────────────────
 
-function OASwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={() => onChange(!on)}
-      className={`relative h-[26px] w-[44px] flex-shrink-0 cursor-pointer rounded-full border transition-all duration-200 ${
-        on ? 'border-champagne bg-champagne' : 'border-lineStrong bg-[#ede4d2]'
-      }`}
-    >
-      <span
-        className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full shadow-soft transition-all duration-200 ${
-          on ? 'left-[21px] bg-white' : 'left-[3px] bg-surface'
-        }`}
-      />
-    </button>
-  );
-}
-
 function OAPwdInput({ label, hint, value, onChange, autoComplete }: {
   label: string; hint?: string; value: string;
   onChange: (v: string) => void; autoComplete?: string;
@@ -880,7 +845,7 @@ function AccountTab() {
                   <span className="text-[13.5px] font-medium text-ink">Authentification à deux facteurs</span>
                   <span className="text-[12px] text-muted">Code SMS à chaque nouvelle connexion · fortement recommandé</span>
                 </div>
-                <OASwitch on={twoFA} onChange={setTwoFA} />
+                <Switch checked={twoFA} onChange={setTwoFA} ariaLabel="Authentification à deux facteurs" />
               </div>
 
               {/* Active sessions */}
@@ -966,7 +931,11 @@ function AccountTab() {
                     <span className="text-[13.5px] font-medium text-ink">{row.n}</span>
                     <span className="text-[12px] text-muted">{row.s}</span>
                   </div>
-                  <OASwitch on={notif[row.k]} onChange={(v) => setNotif((prev) => ({ ...prev, [row.k]: v }))} />
+                  <Switch
+                    checked={notif[row.k]}
+                    onChange={(v) => setNotif((prev) => ({ ...prev, [row.k]: v }))}
+                    ariaLabel={row.n}
+                  />
                 </div>
               ))}
             </div>

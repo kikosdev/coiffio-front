@@ -29,7 +29,8 @@ export function BookSummary({ canNext }: Props) {
   const stylistLabel = stylistId === ANY_STYLIST ? 'No preference' : stylistName;
   const hold = Math.round(totalPrice * 0.2);
 
-  const ctaLabel = step === 1 ? 'Choose stylist' : step === 2 ? 'Pick a time' : step === 3 ? 'Review & confirm' : 'Confirm booking';
+  const ctaLabel =
+    step === 1 ? 'Choose services' : step === 2 ? 'Choose stylist' : step === 3 ? 'Pick a time' : step === 4 ? 'Review & confirm' : 'Confirm booking';
 
   return (
     <div className="summary">
@@ -92,10 +93,10 @@ export function BookSummary({ canNext }: Props) {
           </div>
 
           <div className="summary-cta">
-            <button className="btn btn-primary" onClick={() => step < 4 && next()} disabled={!canNext || step === 4}>
-              {step === 4 ? <Check size={14} /> : null}
+            <button className="btn btn-primary" onClick={() => step < 5 && next()} disabled={!canNext || step === 5}>
+              {step === 5 ? <Check size={14} /> : null}
               {ctaLabel}
-              {step < 4 && <ArrowRight size={14} style={{ marginLeft: 6 }} />}
+              {step < 5 && <ArrowRight size={14} style={{ marginLeft: 6 }} />}
             </button>
             <div style={{ fontSize: 10.5, color: 'var(--muted)', textAlign: 'center', marginTop: 10, letterSpacing: '0.06em' }}>
               No payment now — {formatMoney(hold)} hold authorised on confirmation.

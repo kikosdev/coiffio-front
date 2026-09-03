@@ -42,8 +42,13 @@ function todayISO(): string {
   return localDateISO();
 }
 
+export type BookStep = 1 | 2 | 3 | 4 | 5;
+
 interface BookStore {
-  step: 1 | 2 | 3 | 4;
+  step: BookStep;
+  salonSlug: string;
+  salonName: string;
+  region: string;
   catalog: BookService[];
   catalogLoading: boolean;
   selectedServiceIds: string[];
@@ -58,6 +63,8 @@ interface BookStore {
   error: string | null;
 
   fetchCatalog: () => Promise<void>;
+  setRegion: (region: string) => void;
+  setSalon: (slug: string, name: string) => void;
   toggleService: (id: string) => void;
   removeService: (id: string) => void;
   setDate: (d: string) => void;
@@ -65,7 +72,7 @@ interface BookStore {
   setSlot: (startISO: string, time: string) => void;
   lockStylist: (id: string, name: string) => void;
   setForm: (patch: Partial<BookForm>) => void;
-  setStep: (n: 1 | 2 | 3 | 4) => void;
+  setStep: (n: BookStep) => void;
   next: () => void;
   back: () => void;
   setDone: (r: BookResult) => void;
@@ -78,8 +85,22 @@ const EMPTY_FORM: BookForm = {
   isFirstTime: true, smsReminder: true, terms: false,
 };
 
-export const useBookStore = create<BookStore>((set) => ({
+/** Réinitialise tout l'aval du choix de salon (services/coiffeur/créneau) — service/région/salon
+ * deviennent la clé de contexte, changer l'un invalide toujours ce qui suit (jamais l'inverse). */
+const DOWNSTREAM_RESET = {
+  catalog: [] as BookService[],
+  selectedServiceIds: [] as string[],
+  stylistId: '',
+  stylistName: '',
+  slotStart: '',
+  slotTime: '',
+};
+
+export const useBookStore = create<BookStore>((set, get) => ({
   step: 1,
+  salonSlug: '',
+  salonName: '',
+  region: '',
   catalog: [],
   catalogLoading: false,
   selectedServiceIds: [],
@@ -94,14 +115,20 @@ export const useBookStore = create<BookStore>((set) => ({
   error: null,
 
   fetchCatalog: async () => {
+    const { salonSlug } = get();
+    if (!salonSlug) return;
     set({ catalogLoading: true });
     try {
-      const catalog = await api.get<BookService[]>('/book/services');
+      const catalog = await api.get<BookService[]>(`/${salonSlug}/book/services`);
       set({ catalog, catalogLoading: false });
     } catch (err) {
       set({ catalogLoading: false, error: err instanceof ApiError ? err.message : 'Erreur de chargement' });
     }
   },
+
+  setRegion: (region) => set({ region, salonSlug: '', salonName: '', ...DOWNSTREAM_RESET }),
+
+  setSalon: (salonSlug, salonName) => set({ salonSlug, salonName, ...DOWNSTREAM_RESET }),
 
   toggleService: (id) =>
     set((s) => ({
@@ -129,15 +156,15 @@ export const useBookStore = create<BookStore>((set) => ({
   lockStylist: (stylistId, stylistName) => set({ stylistId, stylistName }),
   setForm: (patch) => set((s) => ({ form: { ...s.form, ...patch } })),
   setStep: (step) => set({ step, error: null }),
-  next: () => set((s) => ({ step: Math.min(s.step + 1, 4) as 1 | 2 | 3 | 4, error: null })),
-  back: () => set((s) => ({ step: Math.max(s.step - 1, 1) as 1 | 2 | 3 | 4, error: null })),
+  next: () => set((s) => ({ step: Math.min(s.step + 1, 5) as BookStep, error: null })),
+  back: () => set((s) => ({ step: Math.max(s.step - 1, 1) as BookStep, error: null })),
   setDone: (result) => set({ result, done: true }),
   setError: (error) => set({ error }),
 
   reset: () =>
     set({
-      step: 1, selectedServiceIds: [], date: todayISO(), stylistId: '', stylistName: '',
-      slotStart: '', slotTime: '', form: { ...EMPTY_FORM }, done: false, result: null, error: null,
+      step: 1, salonSlug: '', salonName: '', region: '', date: todayISO(),
+      form: { ...EMPTY_FORM }, done: false, result: null, error: null, ...DOWNSTREAM_RESET,
     }),
 }));
 

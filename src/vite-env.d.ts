@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
   readonly VITE_SOCKET_URL: string;
+  readonly VITE_DEPLOYMENT_MODE?: string;
+  readonly VITE_DEFAULT_SALON_SLUG?: string;
 }
 
 interface ImportMeta {

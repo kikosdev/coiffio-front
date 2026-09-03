@@ -1,34 +1,40 @@
-import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { Fragment, useEffect } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, MapPin, Home, UserRound, CalendarPlus, Navigation } from 'lucide-react';
 import './book.css';
-import { useBookStore } from './bookStore';
+import { useBookStore, type BookStep } from './bookStore';
+import { BookSalonStep } from './BookSalonStep';
 import { BookServices } from './BookServices';
 import { BookStylists } from './BookStylists';
 import { BookTime } from './BookTime';
 import { BookConfirm } from './BookConfirm';
 import { BookSummary } from './BookSummary';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useSalonProfileStore } from '@/storefront/platform/salonProfileStore';
 
 const STEPS = [
-  { num: 'I', label: 'Services' },
-  { num: 'II', label: 'Stylist' },
-  { num: 'III', label: 'Time' },
-  { num: 'IV', label: 'Confirm' },
+  { num: 'I', label: 'Salon' },
+  { num: 'II', label: 'Services' },
+  { num: 'III', label: 'Stylist' },
+  { num: 'IV', label: 'Time' },
+  { num: 'V', label: 'Confirm' },
 ];
 
 function BookNav() {
   const user = useAuthStore((s) => s.user);
+  const salonName = useBookStore((s) => s.salonName);
   const firstName = user?.name?.split(' ')[0] ?? null;
   return (
     <nav className="book-nav">
       <div className="brand">
-        <span className="mark">Haire</span>
+        <span className="mark">Coiffio</span>
         <span className="dot" />
-        <span className="sub">Maison du Cheveu</span>
+        <span className="sub">L'annuaire des salons</span>
       </div>
       <div className="right">
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={13} /> 18 rue de Sévigné, Paris 4</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <MapPin size={13} /> {salonName || 'Choisissez votre salon'}
+        </span>
         <span style={{ color: 'var(--line-strong)' }}>·</span>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}><Home size={13} /> Home</Link>
         <span style={{ color: 'var(--line-strong)' }}>·</span>
@@ -58,7 +64,7 @@ function StepRail({ canGoTo }: { canGoTo: (n: number) => boolean }) {
           <Fragment key={s.num}>
             <button
               className={`step ${status}`}
-              onClick={() => canGoTo(n) && setStep(n as 1 | 2 | 3 | 4)}
+              onClick={() => canGoTo(n) && setStep(n as BookStep)}
               style={{ background: 'transparent', border: 0, cursor: canGoTo(n) ? 'pointer' : 'default' }}
             >
               <span className="step-num">{n < step ? <Check size={12} /> : s.num}</span>
@@ -102,24 +108,52 @@ function SuccessScreen() {
   );
 }
 
-/** Parcours public "Book a Visit" — 4 étapes + récap collant (design Claude). */
+/** Parcours public "Book a Visit" — 5 étapes (Salon → Services → Stylist → Time → Confirm) + récap collant. */
 export function BookApp() {
+  const { slug: slugParam } = useParams<{ slug?: string }>();
+  const [searchParams] = useSearchParams();
   const step = useBookStore((s) => s.step);
   const done = useBookStore((s) => s.done);
+  const salonSlug = useBookStore((s) => s.salonSlug);
   const selected = useBookStore((s) => s.selectedServiceIds);
   const stylistId = useBookStore((s) => s.stylistId);
   const slotStart = useBookStore((s) => s.slotStart);
+  const setSalon = useBookStore((s) => s.setSalon);
+  const setStep = useBookStore((s) => s.setStep);
   const next = useBookStore((s) => s.next);
   const back = useBookStore((s) => s.back);
 
+  const fetchSalonProfile = useSalonProfileStore((s) => s.fetchProfile);
+
+  // Pré-remplissage depuis `/salons/:slug/book` (canonique, Décision #5) ou l'ancien
+  // `/book?salon=slug` (conservé pour compat descendante) — l'étape I est marquée faite
+  // visuellement et on atterrit directement à l'étape Services.
+  useEffect(() => {
+    const salonParam = slugParam ?? searchParams.get('salon');
+    if (!salonParam || salonSlug) return;
+    void fetchSalonProfile(salonParam).then(() => {
+      const { profile } = useSalonProfileStore.getState();
+      if (profile) {
+        setSalon(profile.slug, profile.name);
+        setStep(2);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const canGoTo = (n: number) => {
     if (n === 1) return true;
-    if (n === 2) return selected.length > 0;
-    if (n === 3) return selected.length > 0 && !!stylistId;
-    if (n === 4) return selected.length > 0 && !!stylistId && !!slotStart;
+    if (n === 2) return !!salonSlug;
+    if (n === 3) return !!salonSlug && selected.length > 0;
+    if (n === 4) return !!salonSlug && selected.length > 0 && !!stylistId;
+    if (n === 5) return !!salonSlug && selected.length > 0 && !!stylistId && !!slotStart;
     return false;
   };
-  const canNext = (step === 1 && selected.length > 0) || (step === 2 && !!stylistId) || (step === 3 && !!slotStart);
+  const canNext =
+    (step === 1 && !!salonSlug) ||
+    (step === 2 && selected.length > 0) ||
+    (step === 3 && !!stylistId) ||
+    (step === 4 && !!slotStart);
 
   if (done) {
     return (
@@ -139,21 +173,23 @@ export function BookApp() {
       <div className="book-stage">
         <div className="book-main">
           <div key={step} className="fade-up">
-            {step === 1 && <BookServices />}
-            {step === 2 && <BookStylists />}
-            {step === 3 && <BookTime />}
-            {step === 4 && <BookConfirm />}
+            {step === 1 && <BookSalonStep />}
+            {step === 2 && <BookServices />}
+            {step === 3 && <BookStylists />}
+            {step === 4 && <BookTime />}
+            {step === 5 && <BookConfirm />}
           </div>
 
-          {step < 4 && (
+          {step < 5 && (
             <div className="book-actions">
               {step > 1 ? (
                 <button className="btn" onClick={back}><ArrowLeft size={14} />Back</button>
               ) : <span />}
               <button className="btn btn-primary" disabled={!canNext} onClick={() => next()}>
-                {step === 1 && 'Choose stylist'}
-                {step === 2 && 'Pick a time'}
-                {step === 3 && 'Review & confirm'}
+                {step === 1 && 'Choose your services'}
+                {step === 2 && 'Choose stylist'}
+                {step === 3 && 'Pick a time'}
+                {step === 4 && 'Review & confirm'}
                 <ArrowRight size={14} />
               </button>
             </div>

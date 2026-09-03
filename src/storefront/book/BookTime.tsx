@@ -10,6 +10,7 @@ const hourOf = (t: string) => Number(t.split(':')[0]) + Number(t.split(':')[1]) 
 
 /** Étape 3 — créneau continu réel via /availability (#1). */
 export function BookTime() {
+  const salonSlug = useBookStore((s) => s.salonSlug);
   const selected = useBookStore((s) => s.selectedServiceIds);
   const catalog = useBookStore((s) => s.catalog);
   const date = useBookStore((s) => s.date);
@@ -21,17 +22,17 @@ export function BookTime() {
 
   const availability = useBookingStore((s) => s.availability);
   const loading = useBookingStore((s) => s.availabilityLoading);
-  const fetchAvailability = useBookingStore((s) => s.fetchAvailability);
+  const fetchPublicAvailability = useBookingStore((s) => s.fetchPublicAvailability);
 
   const totalDur = selected.reduce((a, id) => a + (catalog.find((c) => c._id === id)?.durationMin ?? 0), 0);
   const chips = useMemo(() => dateChips(), []);
   const isAny = stylistId === ANY_STYLIST;
 
   useEffect(() => {
-    if (selected.length === 0) return;
-    if (isAny) void fetchAvailability(selected, date);
-    else void fetchAvailability(selected, date, stylistId);
-  }, [selected, date, stylistId, isAny, fetchAvailability]);
+    if (!salonSlug || selected.length === 0) return;
+    if (isAny) void fetchPublicAvailability(salonSlug, selected, date);
+    else void fetchPublicAvailability(salonSlug, selected, date, stylistId);
+  }, [salonSlug, selected, date, stylistId, isAny, fetchPublicAvailability]);
 
   // Résout le styliste affiché (le meilleur si "any").
   const resolved = useMemo(() => {

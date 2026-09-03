@@ -22,9 +22,12 @@ import { ShopLayout } from '@/storefront/shop/ShopLayout';
 import { ShopCatalog } from '@/storefront/shop/ShopCatalog';
 import { CheckoutPage } from '@/storefront/shop/CheckoutPage';
 import { OrderTracking } from '@/storefront/shop/OrderTracking';
+import { PlatformLanding } from '@/storefront/platform/PlatformLanding';
+import { SalonPage } from '@/storefront/platform/SalonPage';
 import { Landing } from '@/storefront/landing/Landing';
 import { useAuthStore } from '@/shared/store/authStore';
 import { BACKOFFICE_ROLES } from '@/shared/auth/types';
+import { isSingleTenant, DEFAULT_SALON_SLUG } from '@/shared/config/deploymentMode';
 import type { IconName } from '@/shared/ui';
 
 interface RouteDef {
@@ -64,7 +67,16 @@ export const router = createBrowserRouter([
     ),
   },
   // Parcours public "Book a Visit" (invité ou client connecté — merge-on-phone #10).
-  { path: '/book', element: <BookApp /> },
+  // Path A : point d'entrée générique sans salon pré-choisi (l'étape I sert de vrai sélecteur).
+  // Path B (mono-salon) : redirigé vers le salon unique — un seul salon existe, pas de
+  // sélecteur à afficher (Décision #5/#6).
+  {
+    path: '/book',
+    element: isSingleTenant ? <Navigate to={`/salons/${DEFAULT_SALON_SLUG}/book`} replace /> : <BookApp />,
+  },
+  // Flow scopé salon, path-based (Décision #5) — remplace `/book?salon=slug` comme CTA
+  // canonique ; `/book?salon=` reste supporté par BookApp pour compat descendante.
+  { path: '/salons/:slug/book', element: <BookApp /> },
 
   // Boutique publique (storefront) — CartDrawer monté dans ShopLayout.
   {
@@ -76,8 +88,13 @@ export const router = createBrowserRouter([
   },
   { path: '/track/order/:token', element: <OrderTracking /> },
 
-  // Landing publique (sans authentification).
-  { path: '/', element: <Landing /> },
+  // Fiche salon publique (annuaire multi-salon).
+  { path: '/salons/:slug', element: <SalonPage /> },
+  // Annuaire (liste) — masqué en Path B : pas de salon à lister, retour à la landing unique.
+  { path: '/salons', element: isSingleTenant ? <Navigate to="/" replace /> : <PlatformLanding /> },
+
+  // Racine : landing plateforme (Path A, annuaire = entrée) ou landing du salon unique (Path B).
+  { path: '/', element: isSingleTenant ? <Landing /> : <PlatformLanding /> },
 
   // Backoffice (owner/manager/stylist) sous le Shell
   {

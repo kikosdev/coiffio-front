@@ -565,6 +565,68 @@
 .duration-seg.s-3 { background: linear-gradient(135deg, #b89968, #8a6d4a); color: #1c1612; }
 .duration-seg.s-4 { background: linear-gradient(135deg, #c9a575, #b89968); color: #1c1612; }
 
+/* ─── Salon step (I) ─── */
+.salon-region-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+.region-pill {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 7px 15px;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.region-pill.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.region-pill:hover:not(.on) { background: var(--surface); color: var(--ink); }
+
+.salon-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.salon-pick-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.salon-pick-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+.salon-pick-card.selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink), var(--shadow-card);
+}
+.salon-pick-ph {
+  width: 48px; height: 48px; flex-shrink: 0;
+  border-radius: var(--radius);
+  background: linear-gradient(150deg, #c9b89a, #4a3d2e);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(250,246,238,.9);
+}
+.salon-pick-info { flex: 1; min-width: 0; }
+.salon-pick-info .name { font-family: var(--serif); font-size: 17px; font-weight: 500; }
+.salon-pick-info .meta { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.salon-pick-arrow { color: var(--muted); flex-shrink: 0; }
+.salon-pick-card.selected .salon-pick-arrow { color: var(--champagne-deep); }
+@media (max-width: 720px) {
+  .salon-pick-grid { grid-template-columns: 1fr; }
+}
+
 /* ─── Stylist step ─── */
 .stylist-list {
   display: flex;

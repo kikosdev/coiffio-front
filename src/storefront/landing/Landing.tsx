@@ -9,6 +9,11 @@ import {
 import { useLandingStore, type PublicService, type PublicStylist, type PublicTestimonial, type LandingContent, type LandingStats, type SignatureService, type SalonContact, type SalonHours } from './landingStore';
 import { LanguageSwitcher } from '@/shared/i18n/LanguageSwitcher';
 import { useMoneyFormatter } from '@/utils/money';
+import { DEFAULT_SALON_SLUG } from '@/shared/config/deploymentMode';
+
+/** CTA de réservation Path B (mono-salon) — route direct vers le salon unique, jamais `/book`
+ * générique (Décision #5) ; le slug vient de la config du déploiement, jamais hardcodé ici. */
+const BOOK_HREF = `/salons/${DEFAULT_SALON_SLUG}/book`;
 
 /**
  * Landing publique "Maison Haire" — données 100% dynamiques via /public/salons/:slug.
@@ -77,7 +82,7 @@ function TopNav() {
           <UserRound size={14} />
           <span>{t('nav.signIn')}</span>
         </Link>
-        <Link to="/book" className="tn-book">
+        <Link to={BOOK_HREF} className="tn-book">
           {t('nav.bookVisit')}
           <ArrowRight size={13} />
         </Link>
@@ -104,7 +109,7 @@ function TopNav() {
             <Link to="/sign-in" className="tn-drawer-secondary">
               <UserRound size={15} /><span>{t('nav.signIn')}</span>
             </Link>
-            <Link to="/book" className="tn-book">
+            <Link to={BOOK_HREF} className="tn-book">
               {t('nav.bookVisit')}
               <ArrowRight size={13} />
             </Link>
@@ -129,7 +134,7 @@ function HeroSection({ landing }: { landing: LandingContent | null; stats: Landi
           <p>{landing.heroParagraph}</p>
         )}
         <div className="hero-actions">
-          <Link to="/book" className="tn-book">
+          <Link to={BOOK_HREF} className="tn-book">
             Reserve a visit
             <ArrowRight size={14} />
           </Link>
@@ -174,7 +179,7 @@ function PathsSection() {
             <span className="pc-arrow"><ArrowRight size={14} /></span>
           </div>
         </Link>
-        <Link to="/book" className="path-card">
+        <Link to={BOOK_HREF} className="path-card">
           <div className="pc-num">— II.</div>
           <h3>Book in two <em>clicks</em>, no account needed.</h3>
           <p>Pick a service, pick a stylist, pick a time. We'll text you a confirmation. Decide later if you'd like to join the maison.</p>
@@ -217,7 +222,7 @@ function ServicesSection({ services, loading }: { services: PublicService[]; loa
         </div>
         <div className="right">
           <p>A curated menu spanning cuts, colour, men's grooming, and treatments. Every service is performed by a senior or master stylist.</p>
-          <Link to="/book" className="hero-secondary" style={{ marginTop: 14, display: 'inline-flex' }}>
+          <Link to={BOOK_HREF} className="hero-secondary" style={{ marginTop: 14, display: 'inline-flex' }}>
             <span>See full menu</span>
             <ArrowUpRight size={14} />
           </Link>
@@ -228,7 +233,7 @@ function ServicesSection({ services, loading }: { services: PublicService[]; loa
       ) : (
         <div className="svcs-grid">
           {services.map((svc, i) => (
-            <Link key={svc._id} to="/book" className="svc-tile">
+            <Link key={svc._id} to={BOOK_HREF} className="svc-tile">
               <div className={`ph ${TONES[i % TONES.length]}`} />
               <div className="overlay" />
               <span className="label">{svc.category}</span>
@@ -279,7 +284,7 @@ function StylistsSection({ team, loading }: { team: PublicStylist[]; loading: bo
             const [first, ...rest] = s.name.split(' ');
             const last = rest.join(' ');
             return (
-              <Link to="/book" className="stylist-tile" key={s._id}>
+              <Link to={BOOK_HREF} className="stylist-tile" key={s._id}>
                 <div className="portrait">
                   <div className={`ph ${STYLIST_TONES[i % STYLIST_TONES.length]}`} />
                   <div className="init">{s.name[0]}</div>
@@ -442,7 +447,7 @@ function VisitSection({ contact, hours }: { contact: SalonContact | null; hours:
             </div>
           )}
         </div>
-        <Link to="/book" className="tn-book" style={{ padding: '14px 26px', fontSize: 14 }}>
+        <Link to={BOOK_HREF} className="tn-book" style={{ padding: '14px 26px', fontSize: 14 }}>
           Reserve a visit
           <ArrowRight size={14} />
         </Link>
@@ -502,7 +507,7 @@ function SiteFooter({ contact }: { contact: SalonContact | null; }) {
           <ul>
             <li><Link to="/sign-in">Sign in</Link></li>
             <li><Link to="/register">Create account</Link></li>
-            <li><Link to="/book">Book a visit</Link></li>
+            <li><Link to={BOOK_HREF}>Book a visit</Link></li>
             <li><Link to="/my-account">My visits</Link></li>
             <li><a href="#">Loyalty programme</a></li>
           </ul>

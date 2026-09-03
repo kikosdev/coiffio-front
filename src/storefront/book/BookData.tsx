@@ -1,7 +1,5 @@
 import { api } from '@/shared/api/client';
 
-const SALON_SLUG = (import.meta.env.VITE_DEFAULT_SALON_SLUG as string | undefined) ?? 'salon-haire';
-
 export interface PublicStylistProfile {
   id: string;
   name: string;
@@ -11,8 +9,8 @@ export interface PublicStylistProfile {
   bio: string;
 }
 
-export function fetchPublicTeam(): Promise<PublicStylistProfile[]> {
-  return api.get<PublicStylistProfile[]>(`/public/salons/${SALON_SLUG}/team`);
+export function fetchPublicTeam(salonSlug: string): Promise<PublicStylistProfile[]> {
+  return api.get<PublicStylistProfile[]>(`/public/salons/${salonSlug}/team`);
 }
 
 // Mêmes teintes de portrait que la section "The Team" de la landing (cohérence visuelle).

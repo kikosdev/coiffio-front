@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import api from '@/shared/api/client';
+import { DEFAULT_SALON_SLUG } from '@/shared/config/deploymentMode';
 
-const SLUG = (import.meta.env.VITE_DEFAULT_SALON_SLUG as string | undefined) ?? 'salon-haire';
-const BASE = `/public/salons/${SLUG}`;
+const BASE = `/public/salons/${DEFAULT_SALON_SLUG}`;
 
 export interface SalonPublic { name: string; slug?: string; locale: string; }
 export interface LandingContent {

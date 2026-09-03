@@ -32,6 +32,7 @@ function pivotTimeline(timeline: TimelineDay[]): { qualified: Set<string>; nextB
 
 /** Étape 2 — une carte par coiffeur qualifié (portrait, bio, prochaine dispo sur 14 jours). */
 export function BookStylists() {
+  const salonSlug = useBookStore((s) => s.salonSlug);
   const selected = useBookStore((s) => s.selectedServiceIds);
   const catalog = useBookStore((s) => s.catalog);
   const stylistId = useBookStore((s) => s.stylistId);
@@ -39,19 +40,20 @@ export function BookStylists() {
 
   const timeline = useBookingStore((s) => s.timeline);
   const loading = useBookingStore((s) => s.timelineLoading);
-  const fetchTimeline = useBookingStore((s) => s.fetchTimeline);
+  const fetchPublicTimeline = useBookingStore((s) => s.fetchPublicTimeline);
 
   const [team, setTeam] = useState<PublicStylistProfile[]>([]);
 
   const totalDur = selected.reduce((a, id) => a + (catalog.find((c) => c._id === id)?.durationMin ?? 0), 0);
 
   useEffect(() => {
-    fetchPublicTeam().then(setTeam).catch(() => setTeam([]));
-  }, []);
+    if (!salonSlug) return;
+    fetchPublicTeam(salonSlug).then(setTeam).catch(() => setTeam([]));
+  }, [salonSlug]);
 
   useEffect(() => {
-    if (selected.length > 0) void fetchTimeline(selected, todayISO(), undefined, TIMELINE_DAYS);
-  }, [selected, fetchTimeline]);
+    if (salonSlug && selected.length > 0) void fetchPublicTimeline(salonSlug, selected, todayISO(), undefined, TIMELINE_DAYS);
+  }, [salonSlug, selected, fetchPublicTimeline]);
 
   const { qualified, nextByStylist } = useMemo(() => pivotTimeline(timeline), [timeline]);
   const chipByIso = useMemo(() => new Map(dateChips().map((c) => [c.iso, c])), []);

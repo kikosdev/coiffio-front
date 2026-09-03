@@ -9,6 +9,7 @@ import { useAuthStore } from '@/shared/store/authStore';
 /** Étape 4 — récap + coordonnées + confirmation (POST /appointments online). */
 export function BookConfirm() {
   const formatMoney = useMoneyFormatter();
+  const salonSlug = useBookStore((s) => s.salonSlug);
   const catalog = useBookStore((s) => s.catalog);
   const selected = useBookStore((s) => s.selectedServiceIds);
   const date = useBookStore((s) => s.date);
@@ -24,7 +25,7 @@ export function BookConfirm() {
   const error = useBookStore((s) => s.error);
   const setError = useBookStore((s) => s.setError);
 
-  const book = useBookingStore((s) => s.book);
+  const bookPublic = useBookingStore((s) => s.bookPublic);
   const [submitting, setSubmitting] = useState(false);
 
   const user = useAuthStore((s) => s.user);
@@ -50,11 +51,11 @@ export function BookConfirm() {
   const valid = form.firstName.trim() && /\S+@\S+\.\S+/.test(form.email) && form.phone.trim() && form.terms && stylistId !== ANY_STYLIST;
 
   const submit = async () => {
-    if (!valid) return;
+    if (!valid || !salonSlug) return;
     setSubmitting(true);
     setError(null);
     try {
-      const appt = await book({
+      const appt = await bookPublic(salonSlug, {
         serviceIds: selected,
         stylistId,
         start: slotStart,
@@ -74,7 +75,7 @@ export function BookConfirm() {
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 409) {
         setError('Ce créneau vient d’être réservé. Choisissez-en un autre.');
-        setStep(3);
+        setStep(4);
       } else {
         setError(err instanceof ApiError ? err.message : 'Réservation impossible.');
       }

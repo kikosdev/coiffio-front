@@ -74,6 +74,13 @@ interface BookingStore {
   book: (dto: CreateAppointmentDto) => Promise<Appointment>;
   walkin: (dto: CreateWalkinDto) => Promise<Appointment>;
   cancel: (id: string) => Promise<void>;
+
+  /** Variantes publiques scopées par slug (annuaire multi-salon) — utilisées par le flow
+   * storefront `/book`, distinctes des méthodes ci-dessus qui restent utilisées telles
+   * quelles par le backoffice (`NewAppointmentModal`). */
+  fetchPublicAvailability: (salonSlug: string, serviceIds: string[], date: string, stylistId?: string) => Promise<void>;
+  fetchPublicTimeline: (salonSlug: string, serviceIds: string[], startDate: string, stylistId?: string, days?: number) => Promise<void>;
+  bookPublic: (salonSlug: string, dto: CreateAppointmentDto) => Promise<Appointment>;
 }
 
 export const useBookingStore = create<BookingStore>((set) => ({
@@ -154,5 +161,40 @@ export const useBookingStore = create<BookingStore>((set) => ({
   cancel: async (id) => {
     const saved = await api.patch<Appointment>(`/appointments/${id}/cancel`, {});
     set((s) => ({ appointments: s.appointments.map((a) => (a._id === id ? saved : a)) }));
+  },
+
+  fetchPublicAvailability: async (salonSlug, serviceIds, date, stylistId) => {
+    set({ availabilityLoading: true });
+    try {
+      const availability = await api.get<StylistAvailability[]>(`/${salonSlug}/availability`, {
+        serviceIds,
+        date,
+        ...(stylistId ? { stylistId } : {}),
+      });
+      set({ availability, availabilityLoading: false });
+    } catch (err) {
+      set({ availabilityLoading: false, error: err instanceof ApiError ? err.message : 'Erreur' });
+    }
+  },
+
+  fetchPublicTimeline: async (salonSlug, serviceIds, startDate, stylistId, days) => {
+    set({ timelineLoading: true });
+    try {
+      const timeline = await api.get<TimelineDay[]>(`/${salonSlug}/availability/timeline`, {
+        serviceIds,
+        startDate,
+        ...(stylistId ? { stylistId } : {}),
+        ...(days ? { days } : {}),
+      });
+      set({ timeline, timelineLoading: false });
+    } catch (err) {
+      set({ timelineLoading: false, error: err instanceof ApiError ? err.message : 'Erreur' });
+    }
+  },
+
+  bookPublic: async (salonSlug, dto) => {
+    const saved = await api.post<Appointment>(`/${salonSlug}/appointments`, dto);
+    set((s) => ({ appointments: [...s.appointments, saved].sort((a, b) => a.start.localeCompare(b.start)) }));
+    return saved;
   },
 }));

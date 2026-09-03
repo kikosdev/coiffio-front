@@ -12,6 +12,7 @@ const AUDIENCES: { id: Audience; label: string }[] = [
 /** Étape 1 — composition de la visite (services genrés + catégories). */
 export function BookServices() {
   const formatMoney = useMoneyFormatter();
+  const salonSlug = useBookStore((s) => s.salonSlug);
   const catalog = useBookStore((s) => s.catalog);
   const fetchCatalog = useBookStore((s) => s.fetchCatalog);
   const selected = useBookStore((s) => s.selectedServiceIds);
@@ -20,7 +21,7 @@ export function BookServices() {
   const [cat, setCat] = useState('all');
   const [aud, setAud] = useState<Audience>('all');
 
-  useEffect(() => { if (catalog.length === 0) void fetchCatalog(); }, [catalog.length, fetchCatalog]);
+  useEffect(() => { if (salonSlug && catalog.length === 0) void fetchCatalog(); }, [salonSlug, catalog.length, fetchCatalog]);
 
   const categories = useMemo(() => {
     const set = new Map<string, number>();

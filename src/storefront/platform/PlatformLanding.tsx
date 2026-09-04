@@ -144,14 +144,42 @@ function ShowcaseSkeleton() {
 }
 
 /** GET /discovery/sponsored dédié (Prompt 6) — plus une dérivation de l'annuaire : la
- * Showcase et l'annuaire ont des cycles de vie indépendants (sponsoring vs présence). */
-function ShowcaseSection({ entries, loading, error, onRetry }: { entries: SponsoredEntry[]; loading: boolean; error: string | null; onRetry: () => void }) {
+ * Showcase et l'annuaire ont des cycles de vie indépendants (sponsoring vs présence).
+ *
+ * Vide (succès) OU erreur réseau → section entièrement masquée pour le visiteur (collapse
+ * silencieux, aucun résidu visuel). L'échec reste tracé côté équipe (voir l'effet ci-dessous) :
+ * une section payante en panne ne doit pas disparaître sans laisser de trace. */
+function ShowcaseSection({ entries, loading, error }: { entries: SponsoredEntry[]; loading: boolean; error: string | null }) {
   const { t } = useTranslation('landing');
 
-  // Liste vide (succès, juste personne de sponsorisé) → section entièrement masquée, pas
-  // d'état vide visible sur la home. Une ERREUR reste affichée : sinon une panne réseau se
-  // confondrait avec "aucun sponsor", ce que le brief interdit explicitement.
-  if (!loading && !error && entries.length === 0) return null;
+  // Signal opérateur : logué une fois par échec (dépendance [error], pas à chaque render).
+  // Aucun outil d'observabilité (Sentry/reportError/logger) trouvé dans ce projet — TODO
+  // laissé en place plutôt que d'en installer un ; à signaler pour décision.
+  useEffect(() => {
+    if (!error) return;
+    if (import.meta.env.DEV) console.warn('[ShowcaseSection] sponsored fetch failed:', error);
+    // TODO: report sponsored fetch failure to monitoring
+  }, [error]);
+
+  if (loading) {
+    return (
+      <section className="plt-showcase">
+        <div className="plt-section-head">
+          <div className="left">
+            <div className="eyebrow">{t('platform.showcase.eyebrow')}</div>
+            <h2>{t('platform.showcase.title')} <em>{t('platform.showcase.titleEm')}</em></h2>
+          </div>
+          <div className="right">
+            <p>{t('platform.showcase.subtitle')}</p>
+          </div>
+        </div>
+        <ShowcaseSkeleton />
+      </section>
+    );
+  }
+
+  if (error) return null;
+  if (!entries || entries.length === 0) return null;
 
   return (
     <section className="plt-showcase">
@@ -164,24 +192,18 @@ function ShowcaseSection({ entries, loading, error, onRetry }: { entries: Sponso
           <p>{t('platform.showcase.subtitle')}</p>
         </div>
       </div>
-      {loading ? (
-        <ShowcaseSkeleton />
-      ) : error ? (
-        <ErrorState message={error} onRetry={onRetry} />
-      ) : (
-        <div className="plt-showcase-grid">
-          {entries.map((s, i) => (
-            <Link to={`/salons/${s.slug}/book`} className="plt-showcase-card" key={s.slug}>
-              <span className="plt-badge-sponsored">{t('platform.showcase.badge')}</span>
-              <div className={`plt-showcase-ph plt-ph ${PH_TONES[i % PH_TONES.length]}`}>
-                {s.coverImage ? <img src={s.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : <Store size={28} />}
-              </div>
-              <div className="name">{s.name}</div>
-              {s.city && <div className="city"><MapPin size={11} />{s.city}</div>}
-            </Link>
-          ))}
-        </div>
-      )}
+      <div className="plt-showcase-grid">
+        {entries.map((s, i) => (
+          <Link to={`/salons/${s.slug}/book`} className="plt-showcase-card" key={s.slug}>
+            <span className="plt-badge-sponsored">{t('platform.showcase.badge')}</span>
+            <div className={`plt-showcase-ph plt-ph ${PH_TONES[i % PH_TONES.length]}`}>
+              {s.coverImage ? <img src={s.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : <Store size={28} />}
+            </div>
+            <div className="name">{s.name}</div>
+            {s.city && <div className="city"><MapPin size={11} />{s.city}</div>}
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
@@ -419,7 +441,7 @@ export function PlatformLanding() {
     <div className="plt">
       <PlatformNav />
       <HeroSection q={q} region={region} onSubmit={updateFilters} />
-      <ShowcaseSection entries={sponsored} loading={sponsoredLoading} error={sponsoredError} onRetry={() => fetchSponsored()} />
+      <ShowcaseSection entries={sponsored} loading={sponsoredLoading} error={sponsoredError} />
       <DirectorySection
         entries={directory}
         loading={directoryLoading}
